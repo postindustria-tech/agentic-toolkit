@@ -1,0 +1,37 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "agentic-toolkit",
+  "version": "1.0.0",
+  "description": "Complete toolkit for building agentic systems with LangGraph, DSPy, and modern AI workflows",
+  "owner": {
+    "name": "Postindustria Tech",
+    "email": "oss@postindustria.com"
+  },
+  "plugins": [
+    {
+      "name": "langgraph-dev",
+      "source": "./plugins/langgraph-dev",
+      "description": "Comprehensive toolkit for building agentic systems using LangGraph and LangChain, with tutorial-grounded patterns and best practices",
+      "version": "0.1.0",
+      "author": {
+        "name": "Constantine Mirin",
+        "email": "oss@postindustria.com"
+      },
+      "category": "development",
+      "keywords": [
+        "langgraph",
+        "langchain",
+        "agents",
+        "workflows",
+        "rag",
+        "agentic-systems",
+        "state-management",
+        "multi-agent",
+        "testing"
+      ],
+      "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
+      "repository": "https://github.com/postindustria-tech/agentic-toolkit",
+      "license": "MIT"
+    }
+  ]
+}

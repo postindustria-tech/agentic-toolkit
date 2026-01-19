@@ -1,0 +1,15 @@
+{
+  "dependencies": [
+    ".",
+    "langchain-anthropic"
+  ],
+  "graphs": {
+    "agent": "./src/graph.py:graph"
+  },
+  "env": ".env",
+  "python_version": "3.11",
+  "queue": {
+    "enabled": true,
+    "max_concurrent_runs": 10
+  }
+}

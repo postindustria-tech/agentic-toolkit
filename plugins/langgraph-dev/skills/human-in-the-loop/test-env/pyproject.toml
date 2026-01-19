@@ -1,0 +1,9 @@
+[project]
+name = "test-env"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-core>=1.2.7",
+    "langgraph>=1.0.6",
+]

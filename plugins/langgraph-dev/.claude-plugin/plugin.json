@@ -1,0 +1,23 @@
+{
+  "name": "langgraph-dev",
+  "version": "0.1.0",
+  "description": "Comprehensive toolkit for building agentic systems using LangGraph and LangChain, with tutorial-grounded patterns and best practices",
+  "author": {
+    "name": "Postindustria Tech",
+    "email": "tech@postindustria.com"
+  },
+  "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
+  "repository": "https://github.com/postindustria-tech/agentic-toolkit",
+  "keywords": [
+    "langgraph",
+    "langchain",
+    "agents",
+    "workflows",
+    "rag",
+    "agentic-systems",
+    "state-management",
+    "multi-agent",
+    "testing"
+  ],
+  "license": "MIT"
+}

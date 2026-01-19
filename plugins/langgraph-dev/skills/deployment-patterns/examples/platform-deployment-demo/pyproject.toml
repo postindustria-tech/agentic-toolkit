@@ -1,0 +1,39 @@
+[project]
+name = "platform-deployment-demo"
+version = "1.0.0"
+description = "LangGraph Platform deployment validation example"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2.65",
+    "langgraph-sdk>=0.3.1",
+    "langchain-anthropic>=0.3.0",
+    "langchain-core>=0.3.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.32.0",
+    "python-dotenv>=1.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "langgraph-cli[inmem]>=0.1.68",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "ANN", "ASYNC", "S", "B", "A", "C4", "RET", "SIM", "ARG"]
+ignore = ["ANN101", "ANN102", "S101"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

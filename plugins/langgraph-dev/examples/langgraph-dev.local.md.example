@@ -1,0 +1,111 @@
+---
+# LLM Configuration
+llm_provider: anthropic  # Options: anthropic, groq, openai
+llm_model: claude-sonnet-4-5  # Model name for generated code
+
+# Vector Store & Embeddings
+vector_store: faiss  # Options: faiss, chroma
+embeddings: huggingface  # Options: huggingface, openai
+
+# Testing
+test_framework: pytest  # Options: pytest
+
+# Code Style
+code_style: pydantic_v2  # Options: pydantic_v2, pydantic_v1
+async_by_default: true  # Generate async code by default
+include_type_hints: true  # Include type hints in generated code
+include_docstrings: true  # Include docstrings in generated code
+
+# Workflow Validation
+auto_validate: false  # Automatically run workflow-validator after file changes
+---
+
+# LangGraph Development Settings
+
+This file configures the langgraph-dev plugin for code generation and scaffolding.
+
+## Usage
+
+1. Copy this file to `.claude/langgraph-dev.local.md`
+2. Customize the settings above to match your preferences
+3. All settings are optional - the plugin uses sensible defaults
+
+## Settings Explanation
+
+### LLM Configuration
+- **llm_provider**: Which LLM provider to use in generated code
+  - `anthropic`: Anthropic Claude (recommended for this project)
+  - `groq`: Groq LLMs (fast inference)
+  - `openai`: OpenAI GPT models
+
+- **llm_model**: Specific model name
+  - Anthropic: `claude-sonnet-4-5`, `claude-opus-4`
+  - Groq: `qwen-2.5-32b`, `llama-3.1-70b`
+  - OpenAI: `gpt-4`, `gpt-3.5-turbo`
+
+### Vector Store & Embeddings
+- **vector_store**: Vector database for RAG implementations
+  - `faiss`: Facebook AI Similarity Search (lightweight, local)
+  - `chroma`: Chroma DB (more features, persistent)
+
+- **embeddings**: Embedding model provider
+  - `huggingface`: HuggingFace models (free, `all-MiniLM-L6-v2`)
+  - `openai`: OpenAI embeddings (requires API key)
+
+### Testing
+- **test_framework**: Testing framework for generated tests
+  - `pytest`: Standard Python testing (only option currently)
+
+### Code Style
+- **code_style**: Pydantic version for state schemas
+  - `pydantic_v2`: Pydantic 2.x (recommended, modern)
+  - `pydantic_v1`: Pydantic 1.x (legacy compatibility)
+
+- **async_by_default**: Generate async code patterns
+  - `true`: Use `async def`, `await`, `ainvoke()`
+  - `false`: Use synchronous patterns
+
+- **include_type_hints**: Add type annotations
+  - `true`: Full type hints on all functions/methods
+  - `false`: Minimal type hints (only where required)
+
+- **include_docstrings**: Add documentation strings
+  - `true`: Docstrings for all functions/classes
+  - `false`: No docstrings (code only)
+
+### Workflow Validation
+- **auto_validate**: Run workflow-validator automatically
+  - `true`: Validate after any Write/Edit on StateGraph files
+  - `false`: Only validate when explicitly invoked
+
+## Examples
+
+### Configuration for Anthropic Claude + FAISS
+```yaml
+llm_provider: anthropic
+llm_model: claude-sonnet-4-5
+vector_store: faiss
+embeddings: huggingface
+async_by_default: true
+```
+
+### Configuration for Groq + Chroma
+```yaml
+llm_provider: groq
+llm_model: qwen-2.5-32b
+vector_store: chroma
+embeddings: openai
+async_by_default: true
+```
+
+### Minimal Configuration (All Defaults)
+```yaml
+# Empty frontmatter uses all defaults
+```
+
+## Notes
+
+- This file is ignored by git (`.claude/*.local.md` in .gitignore)
+- Changes take effect immediately for new command invocations
+- Invalid settings fall back to defaults with warnings
+- You can override settings per-command using arguments
