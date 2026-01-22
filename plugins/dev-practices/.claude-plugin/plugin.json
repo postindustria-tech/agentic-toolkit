@@ -21,9 +21,5 @@
     "code-review",
     "architecture"
   ],
-  "license": "MIT",
-  "skills": [
-    "dev-practices-tdd-workflow",
-    "dev-practices-session-completion"
-  ]
+  "license": "MIT"
 }

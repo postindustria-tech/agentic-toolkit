@@ -19,28 +19,5 @@
     "multi-agent",
     "testing"
   ],
-  "license": "MIT",
-  "skills": [
-    "langgraph-dev-basic-rag",
-    "langgraph-dev-conditional-routing",
-    "langgraph-dev-conversation-memory",
-    "langgraph-dev-corrective-rag",
-    "langgraph-dev-deployment-patterns",
-    "langgraph-dev-document-processing",
-    "langgraph-dev-error-recovery",
-    "langgraph-dev-graph-construction",
-    "langgraph-dev-human-in-the-loop",
-    "langgraph-dev-memory-store-and-knowledge",
-    "langgraph-dev-multi-agent-supervisor",
-    "langgraph-dev-parallel-execution",
-    "langgraph-dev-performance-optimization",
-    "langgraph-dev-prompt-engineering",
-    "langgraph-dev-react-agents",
-    "langgraph-dev-state-management",
-    "langgraph-dev-streaming-execution",
-    "langgraph-dev-structured-output",
-    "langgraph-dev-subgraphs-and-composition",
-    "langgraph-dev-testing-agentic-systems",
-    "langgraph-dev-tool-calling"
-  ]
+  "license": "MIT"
 }

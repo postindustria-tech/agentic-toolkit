@@ -130,9 +130,9 @@ Update your project's `.claude/settings.json`:
 ### 🛠️ Technical Changes
 
 **Configuration:**
-- Added explicit `skills` arrays to both plugin.json files
 - Enhanced metadata (homepage, repository, keywords, license)
 - Updated marketplace.json with dev-practices entry
+- Skills are auto-discovered from `skills/` directory structure
 
 **Documentation:**
 - Updated README.md with dev-practices section
@@ -143,6 +143,13 @@ Update your project's `.claude/settings.json`:
 - Removed development artifacts from dev-practices
 - Consistent naming convention across all skills
 - Professional metadata for marketplace distribution
+
+### 🐛 Bug Fix (v0.2.1)
+
+**Fixed plugin.json validation error:**
+- Removed invalid `skills` arrays from plugin.json files
+- Skills are auto-discovered by Claude Code from directory structure
+- This fixes installation errors: "skills: Invalid input"
 
 ### 📊 Plugin Status
 
