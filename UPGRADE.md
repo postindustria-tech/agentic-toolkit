@@ -7,20 +7,37 @@ If you previously installed the `pi-dev` plugin, follow these steps to upgrade t
 ### Quick Upgrade (Recommended)
 
 ```bash
-# 1. Uninstall old plugin
+# 1. Refresh the marketplace to see updated plugin names
+/plugin marketplace add postindustria-tech/agentic-toolkit
+
+# 2. Uninstall old plugin
 /plugin uninstall pi-dev@agentic-toolkit
 
-# 2. Install new plugin
+# 3. Install new plugin
 /plugin install dev-practices@agentic-toolkit
 ```
 
 That's it! The skills will work exactly the same way.
 
+**Why refresh the marketplace?** Re-adding the marketplace updates its plugin list, so Claude knows `dev-practices` is available and `pi-dev` is no longer offered.
+
 ---
 
 ## Detailed Upgrade Steps
 
-### Step 1: Check Current Installation
+### Step 1: Refresh the Marketplace
+
+First, update the marketplace to fetch the latest plugin list:
+
+```bash
+/plugin marketplace add postindustria-tech/agentic-toolkit
+```
+
+This command updates (or re-adds) the marketplace, ensuring Claude knows about the `dev-practices` plugin and that `pi-dev` is no longer available.
+
+**Note:** Re-adding an already-added marketplace updates it - you won't get duplicates.
+
+### Step 2: Check Current Installation
 
 ```bash
 # List installed plugins
@@ -29,7 +46,7 @@ That's it! The skills will work exactly the same way.
 
 Look for `pi-dev@agentic-toolkit` in the output.
 
-### Step 2: Uninstall Old Plugin
+### Step 3: Uninstall Old Plugin
 
 ```bash
 /plugin uninstall pi-dev@agentic-toolkit
@@ -37,7 +54,7 @@ Look for `pi-dev@agentic-toolkit` in the output.
 
 This removes the old `pi-dev` plugin from your system.
 
-### Step 3: Install New Plugin
+### Step 4: Install New Plugin
 
 ```bash
 /plugin install dev-practices@agentic-toolkit
@@ -45,7 +62,7 @@ This removes the old `pi-dev` plugin from your system.
 
 This installs the renamed `dev-practices` plugin with the same skills.
 
-### Step 4: Verify Installation
+### Step 5: Verify Installation
 
 ```bash
 /plugin list

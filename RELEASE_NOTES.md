@@ -24,10 +24,13 @@ Added **dev-practices** plugin for development practices and workflows:
 If you previously installed `pi-dev`, upgrade to `dev-practices`:
 
 ```bash
-# Uninstall old plugin
+# 1. Refresh marketplace to see updated plugins
+/plugin marketplace add postindustria-tech/agentic-toolkit
+
+# 2. Uninstall old plugin
 /plugin uninstall pi-dev@agentic-toolkit
 
-# Install new plugin
+# 3. Install new plugin
 /plugin install dev-practices@agentic-toolkit
 ```
 
