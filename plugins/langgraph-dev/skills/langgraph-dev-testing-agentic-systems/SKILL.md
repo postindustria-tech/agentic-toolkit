@@ -1,5 +1,5 @@
 ---
-name: testing-agentic-systems
+name: langgraph-dev-testing-agentic-systems
 description: This skill should be used when the user asks about "test LangGraph", "test agents", "mock LLM", "evaluation metrics", "test workflows", "unit test nodes", or needs guidance on testing LangGraph applications.
 version: 0.6.0
 ---

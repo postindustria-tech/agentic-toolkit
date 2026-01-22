@@ -32,6 +32,30 @@
       "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
       "repository": "https://github.com/postindustria-tech/agentic-toolkit",
       "license": "MIT"
+    },
+    {
+      "name": "pi-dev",
+      "source": "./plugins/pi-dev",
+      "description": "Productivity and infrastructure development workflows. Provides test-driven development (TDD) and session completion workflows that integrate with beads task management for complete development lifecycle",
+      "version": "0.1.0",
+      "author": {
+        "name": "Konst",
+        "email": "oss@postindustria.com"
+      },
+      "category": "development",
+      "keywords": [
+        "tdd",
+        "test-driven-development",
+        "testing",
+        "git",
+        "workflow",
+        "session-management",
+        "quality-assurance",
+        "beads-integration"
+      ],
+      "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
+      "repository": "https://github.com/postindustria-tech/agentic-toolkit",
+      "license": "MIT"
     }
   ]
 }

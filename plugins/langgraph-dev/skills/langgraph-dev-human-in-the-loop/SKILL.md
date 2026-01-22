@@ -1,5 +1,5 @@
 ---
-name: human-in-the-loop
+name: langgraph-dev-human-in-the-loop
 description: This skill should be used when the user asks about "human-in-the-loop", "interrupt", "interrupt()", "interrupt_before", "interrupt_after", "breakpoints", "approval workflow", "human feedback", "review workflow", "wait for input", "pause execution", "resume execution", "Command API", "state editing", "human approval", "validate input", or needs guidance on implementing human-in-the-loop patterns with LangGraph.
 version: 0.1.0
 ---

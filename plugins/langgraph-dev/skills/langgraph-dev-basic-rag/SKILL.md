@@ -1,5 +1,5 @@
 ---
-name: basic-rag
+name: langgraph-dev-basic-rag
 description: This skill should be used when the user asks about "RAG", "retrieval augmented", "document retrieval", "vector store", "semantic search", "FAISS", "Chroma", "document QA", or needs guidance on implementing RAG patterns with LangGraph.
 version: 0.3.1
 ---
