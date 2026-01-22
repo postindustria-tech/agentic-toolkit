@@ -1,5 +1,5 @@
 ---
-name: pi-dev-session-completion
+name: dev-practices-session-completion
 description: This skill should be used when the user asks to "end session", "complete work", "landing the plane", "finish session", "git push workflow", "session checklist", "push to remote", "how do I finish my work", "commit and push workflow", "finish coding session", "save my work", "end my work session", or needs to properly complete and commit work. Provides critical workflow ensuring no work is lost. Integrates with beads plugin for task tracking and git synchronization.
 version: 0.1.0
 ---

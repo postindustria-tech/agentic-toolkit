@@ -1,7 +1,7 @@
 {
-  "name": "pi-dev",
+  "name": "dev-practices",
   "version": "0.1.0",
-  "description": "Productivity and infrastructure development workflows. Provides test-driven development (TDD) and session completion workflows that integrate with beads task management for complete development lifecycle",
+  "description": "Development practices and workflows for quality-driven software engineering. Provides test-driven development (TDD) and session completion workflows that integrate with beads task management for complete development lifecycle",
   "author": {
     "name": "Konst",
     "email": "oss@postindustria.com"
@@ -9,6 +9,7 @@
   "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
   "repository": "https://github.com/postindustria-tech/agentic-toolkit",
   "keywords": [
+    "development-practices",
     "tdd",
     "test-driven-development",
     "testing",
@@ -16,11 +17,13 @@
     "workflow",
     "session-management",
     "quality-assurance",
-    "beads-integration"
+    "beads-integration",
+    "code-review",
+    "architecture"
   ],
   "license": "MIT",
   "skills": [
-    "pi-dev-tdd-workflow",
-    "pi-dev-session-completion"
+    "dev-practices-tdd-workflow",
+    "dev-practices-session-completion"
   ]
 }

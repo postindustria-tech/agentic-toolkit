@@ -10,7 +10,7 @@ Claude Code plugin marketplace for building agentic systems with LangGraph, DSPy
 
 # Install specific plugins
 /plugin install langgraph-dev@agentic-toolkit
-/plugin install pi-dev@agentic-toolkit
+/plugin install dev-practices@agentic-toolkit
 
 # Or install both
 /plugin install langgraph-dev@agentic-toolkit pi-dev@agentic-toolkit
@@ -37,9 +37,9 @@ Tutorial-grounded patterns and best practices for LangGraph development.
 - Testing and deployment
 - Error handling and optimization
 
-### Post Industria Development (`pi-dev`) - v0.1.0
+### Development Practices (`dev-practices`) - v0.1.0
 
-Productivity and infrastructure development workflows for quality-driven development.
+Development practices and workflows for quality-driven software engineering.
 
 **Status**: Production ready - both skills fully tested and documented.
 
@@ -48,8 +48,8 @@ Productivity and infrastructure development workflows for quality-driven develop
 - **Beads Integration** - Seamlessly integrates with beads task management workflow
 
 **Skills:**
-- **TDD Workflow** (`/pi-dev-tdd-workflow`) - Complete test-driven development cycle with sacred rule enforcement (tests define requirements, never adjust tests to match code). Includes language-specific patterns for Python, JavaScript, Go, TypeScript, and more
-- **Session Completion** (`/pi-dev-session-completion`) - End-of-session checklist ensuring no work is lost. Covers verification steps, git workflows, issue tracking integration, and proper push-to-remote procedures
+- **TDD Workflow** (`/dev-practices-tdd-workflow`) - Complete test-driven development cycle with sacred rule enforcement (tests define requirements, never adjust tests to match code). Includes language-specific patterns for Python, JavaScript, Go, TypeScript, and more
+- **Session Completion** (`/dev-practices-session-completion`) - End-of-session checklist ensuring no work is lost. Covers verification steps, git workflows, issue tracking integration, and proper push-to-remote procedures
 
 **Language Support:**
 - Python, JavaScript/TypeScript, Rust, Go, Ruby, Java
@@ -72,7 +72,7 @@ Add to your project's `.claude/settings.json`:
   },
   "enabledPlugins": {
     "langgraph-dev@agentic-toolkit": true,
-    "pi-dev@agentic-toolkit": true
+    "dev-practices@agentic-toolkit": true
   }
 }
 ```

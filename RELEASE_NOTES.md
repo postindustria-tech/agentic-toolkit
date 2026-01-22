@@ -1,14 +1,14 @@
 # Release Notes
 
-## v0.2.0 - Plugin Namespacing & Pi-Dev Addition (2026-01-22)
+## v0.2.0 - Plugin Namespacing & Dev-Practices Addition (2026-01-22)
 
-### 🎉 New Plugin: pi-dev
+### 🎉 New Plugin: dev-practices
 
-Added **pi-dev** plugin for productivity and infrastructure development workflows:
+Added **dev-practices** plugin for development practices and workflows:
 
-- **TDD Workflow** (`pi-dev-tdd-workflow`) - Complete test-driven development cycle with sacred rule enforcement (tests define requirements, never adjust tests to match code). Includes language-specific patterns for Python, JavaScript, Go, TypeScript, Rust, Ruby, and Java.
+- **TDD Workflow** (`dev-practices-tdd-workflow`) - Complete test-driven development cycle with sacred rule enforcement (tests define requirements, never adjust tests to match code). Includes language-specific patterns for Python, JavaScript, Go, TypeScript, Rust, Ruby, and Java.
 
-- **Session Completion** (`pi-dev-session-completion`) - End-of-session checklist ensuring no work is lost. Covers verification steps, git workflows, issue tracking integration, and proper push-to-remote procedures.
+- **Session Completion** (`dev-practices-session-completion`) - End-of-session checklist ensuring no work is lost. Covers verification steps, git workflows, issue tracking integration, and proper push-to-remote procedures.
 
 **Features:**
 - Language-agnostic TDD best practices
@@ -75,7 +75,7 @@ react-agents              →  langgraph-dev-react-agents
 /plugin marketplace add postindustria-tech/agentic-toolkit
 
 # Install both plugins
-/plugin install langgraph-dev@agentic-toolkit pi-dev@agentic-toolkit
+/plugin install langgraph-dev@agentic-toolkit dev-practices@agentic-toolkit
 ```
 
 ### 🔧 Team Auto-Install
@@ -94,7 +94,7 @@ Update your project's `.claude/settings.json`:
   },
   "enabledPlugins": {
     "langgraph-dev@agentic-toolkit": true,
-    "pi-dev@agentic-toolkit": true
+    "dev-practices@agentic-toolkit": true
   }
 }
 ```
@@ -104,15 +104,15 @@ Update your project's `.claude/settings.json`:
 **Configuration:**
 - Added explicit `skills` arrays to both plugin.json files
 - Enhanced metadata (homepage, repository, keywords, license)
-- Updated marketplace.json with pi-dev entry
+- Updated marketplace.json with dev-practices entry
 
 **Documentation:**
-- Updated README.md with pi-dev section
+- Updated README.md with dev-practices section
 - Added installation instructions for both plugins
 - Updated skill counts and descriptions
 
 **Quality:**
-- Removed development artifacts from pi-dev
+- Removed development artifacts from dev-practices
 - Consistent naming convention across all skills
 - Professional metadata for marketplace distribution
 
@@ -123,7 +123,7 @@ Update your project's `.claude/settings.json`:
 - 5 commands - Work in progress
 - 1 agent - Work in progress
 
-**Pi-Dev (v0.1.0):**
+**Dev-Practices (v0.1.0):**
 - 2 skills - Production ready
 - Beads workflow integration
 - Multi-language support

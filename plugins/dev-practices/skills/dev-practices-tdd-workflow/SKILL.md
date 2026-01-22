@@ -1,5 +1,5 @@
 ---
-name: pi-dev-tdd-workflow
+name: dev-practices-tdd-workflow
 description: This skill should be used when the user asks to "use TDD", "test-driven development", "write tests first", "red green refactor", "never adjust tests to match code", "fix a bug with TDD", "refactor with tests", "how should I write tests", "test first development", "testing workflow", "write code with tests", "tests before code", mentions "tests define requirements", or discusses test-driven development workflow. Provides comprehensive 4-step TDD loop with sacred rule enforcement that tests are grounded in requirements. Integrates with beads workflow during implementation phase.
 version: 0.1.0
 ---
