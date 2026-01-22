@@ -17,6 +17,31 @@ Added **dev-practices** plugin for development practices and workflows:
 - CI/CD integration examples
 - Quality gates and pre-commit hooks
 
+**Note:** This plugin was initially released as `pi-dev` but was renamed to `dev-practices` for clarity and broader applicability. If you installed `pi-dev`, see the **Upgrade Instructions** section below.
+
+### 🔄 Upgrade Instructions: pi-dev → dev-practices
+
+If you previously installed `pi-dev`, upgrade to `dev-practices`:
+
+```bash
+# Uninstall old plugin
+/plugin uninstall pi-dev@agentic-toolkit
+
+# Install new plugin
+/plugin install dev-practices@agentic-toolkit
+```
+
+**For team auto-install:** Update `.claude/settings.json`:
+```json
+{
+  "enabledPlugins": {
+    "dev-practices@agentic-toolkit": true
+  }
+}
+```
+
+**See detailed upgrade guide:** [UPGRADE.md](UPGRADE.md)
+
 ### ⚠️ Breaking Changes: Langgraph-Dev
 
 **All 21 langgraph-dev skills renamed with plugin namespace prefix.**

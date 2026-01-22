@@ -13,8 +13,10 @@ Claude Code plugin marketplace for building agentic systems with LangGraph, DSPy
 /plugin install dev-practices@agentic-toolkit
 
 # Or install both
-/plugin install langgraph-dev@agentic-toolkit pi-dev@agentic-toolkit
+/plugin install langgraph-dev@agentic-toolkit dev-practices@agentic-toolkit
 ```
+
+**Upgrading from pi-dev?** See [UPGRADE.md](UPGRADE.md) for instructions.
 
 ## Available Plugins
 
