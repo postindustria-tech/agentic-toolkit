@@ -10,7 +10,8 @@ Run this example:
 
 from typing import Annotated
 from typing_extensions import TypedDict
-from langgraph.graph import StateGraph, add_messages, START, END
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import InMemorySaver
 
 

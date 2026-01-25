@@ -78,7 +78,7 @@ For message fields, use the purpose-built `add_messages` reducer instead of `ope
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 
 class State(TypedDict):
@@ -97,7 +97,7 @@ class State(TypedDict):
 
 **Example with ID-based updates:**
 ```python
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import HumanMessage
 
 msgs1 = [HumanMessage(content="Hello", id="1")]
@@ -133,7 +133,7 @@ For conversational or agentic workflows:
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 
 class ConversationState(TypedDict):
@@ -209,7 +209,7 @@ For complex data with validation:
 ```python
 from typing import Annotated, TypedDict
 from pydantic import BaseModel
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 
 class Config(BaseModel):
@@ -367,7 +367,7 @@ class State(TypedDict):
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
 class State(TypedDict):

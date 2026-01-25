@@ -14,7 +14,8 @@ import uuid
 from langchain_core.tools import tool
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.constants import START
-from langgraph.graph import StateGraph, add_messages
+from langgraph.graph import StateGraph
+from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from langgraph.types import interrupt, Command
 

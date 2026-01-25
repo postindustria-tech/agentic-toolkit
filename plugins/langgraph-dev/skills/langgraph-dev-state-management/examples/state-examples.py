@@ -6,7 +6,8 @@ Examples demonstrating common state patterns with correct imports and types.
 
 from typing import TypedDict, Annotated
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END, add_messages
+from langgraph.graph import StateGraph, END
+from langgraph.graph.message import add_messages
 import operator
 
 # ============================================================================

@@ -230,7 +230,8 @@ graph = builder.compile(checkpointer=checkpointer)
 ```python
 from typing import Annotated
 from typing_extensions import TypedDict
-from langgraph.graph import StateGraph, add_messages, START, END
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain_core.messages import HumanMessage, RemoveMessage
 from langchain_anthropic import ChatAnthropic
@@ -307,7 +308,7 @@ class ExtendedState(MessagesState):
 ```python
 from typing import Annotated
 from typing_extensions import TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 
 class CustomState(TypedDict):
     messages: Annotated[list, add_messages]

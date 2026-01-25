@@ -8,7 +8,8 @@ Complete catalog of LangGraph state patterns.
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import StateGraph, START, add_messages
+from langgraph.graph import StateGraph, START
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage, AIMessage
 
 class State(TypedDict):
@@ -30,7 +31,7 @@ workflow.add_edge(START, "greet")
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
 class State(TypedDict):
@@ -49,7 +50,7 @@ def node2(state): return {"messages": [AIMessage(content="Hi there!")]}
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage, AIMessage
 
 class State(TypedDict):
@@ -81,7 +82,7 @@ def execute_subtask(state: State) -> dict:
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage, AIMessage
 
 class State(TypedDict):
@@ -109,7 +110,7 @@ def handle_error(state: State) -> dict:
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 
 class State(TypedDict):
@@ -167,7 +168,8 @@ class State(TypedDict):
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import StateGraph, START, END, add_messages
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain_core.messages import BaseMessage
 
@@ -220,7 +222,7 @@ class State(TypedDict):
 
 ```python
 from typing import Annotated, TypedDict
-from langgraph.graph import add_messages
+from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 
 class SupervisorState(TypedDict):
