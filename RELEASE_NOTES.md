@@ -1,5 +1,38 @@
 # Release Notes
 
+## v0.3.1 - LangGraph Import Path Updates (2026-01-25)
+
+### 🔧 LangGraph Documentation Compliance
+
+Updated all `add_messages` imports across langgraph-dev skills to match the latest LangGraph documentation (2026).
+
+**Import Path Change:**
+```python
+# Old (deprecated pattern)
+from langgraph.graph import add_messages
+
+# New (current best practice)
+from langgraph.graph.message import add_messages
+```
+
+**Files Updated (17 instances):**
+- `langgraph-dev-conversation-memory/SKILL.md` (2 instances)
+- `langgraph-dev-conversation-memory/examples/thread-management.py` (1 instance)
+- `langgraph-dev-state-management/SKILL.md` (5 instances)
+- `langgraph-dev-state-management/references/state-patterns.md` (7 instances)
+- `langgraph-dev-state-management/examples/state-examples.py` (1 instance)
+- `langgraph-dev-human-in-the-loop/examples/tool-approval.py` (1 instance)
+
+**Verification:**
+- All imports verified against official LangGraph documentation
+- 12 skills already using correct pattern (no changes needed)
+- Code examples remain fully functional
+- Documentation references: [LangGraph Graph API](https://docs.langchain.com/oss/python/langgraph/use-graph-api)
+
+**Impact:** Skills now follow current LangGraph best practices as of 2026. All code examples compile and run with latest LangGraph versions.
+
+---
+
 ## v0.3.0 - Plugin-QA Addition (2026-01-25)
 
 ### 🎉 New Plugin: plugin-qa
