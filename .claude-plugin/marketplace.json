@@ -59,6 +59,31 @@
       "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
       "repository": "https://github.com/postindustria-tech/agentic-toolkit",
       "license": "MIT"
+    },
+    {
+      "name": "plugin-qa",
+      "source": "./plugins/plugin-qa",
+      "description": "Quality assurance tools for Claude Code plugins and skills. Provides systematic methodologies for auditing, verifying, and perfecting plugin skills against official documentation with comprehensive reporting.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Konst",
+        "email": "oss@postindustria.com"
+      },
+      "category": "development",
+      "keywords": [
+        "quality-assurance",
+        "qa",
+        "skill-verification",
+        "plugin-testing",
+        "code-audit",
+        "documentation-verification",
+        "skill-perfection",
+        "testing-tools",
+        "validation"
+      ],
+      "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
+      "repository": "https://github.com/postindustria-tech/agentic-toolkit",
+      "license": "MIT"
     }
   ]
 }

@@ -11,9 +11,10 @@ Claude Code plugin marketplace for building agentic systems with LangGraph, DSPy
 # Install specific plugins
 /plugin install langgraph-dev@agentic-toolkit
 /plugin install dev-practices@agentic-toolkit
+/plugin install plugin-qa@agentic-toolkit
 
-# Or install both
-/plugin install langgraph-dev@agentic-toolkit dev-practices@agentic-toolkit
+# Or install all
+/plugin install langgraph-dev@agentic-toolkit dev-practices@agentic-toolkit plugin-qa@agentic-toolkit
 ```
 
 **Upgrading from pi-dev?** See [UPGRADE.md](UPGRADE.md) for instructions.
@@ -58,6 +59,26 @@ Development practices and workflows for quality-driven software engineering.
 - Verification patterns and quality gates for each language
 - CI/CD integration examples (GitHub Actions, pre-commit hooks)
 
+### Plugin QA (`plugin-qa`) - v0.1.0
+
+Quality assurance tools for validating and perfecting Claude Code plugin skills.
+
+**Status**: Production ready - both skills tested and ready to use.
+
+**What's Included:**
+- **2 Skills** (Production Ready) - Skill auditing and perfection workflows
+
+**Skills:**
+- **Skill Perfection** (`/plugin-qa-skill-perfection`) - Audit and fix plugin skills in a single pass. Verifies skill content against official documentation, fixes issues immediately, and produces verification reports. Includes optional Python syntax preflight script.
+- **QA Audit** (`/plugin-qa-skill-qa-audit`) - Comprehensive QA verification of plugin skills. Verifies every line of instruction, code example, and claim against official documentation. Produces structured audit reports with severity ratings and quality metrics.
+
+**Use Cases:**
+- Validate skill correctness before publishing
+- Check for deprecated APIs and outdated documentation
+- Verify code examples are complete and executable
+- Ensure documentation links are current and accessible
+- Systematic quality review with detailed reporting
+
 ## Team Auto-Install
 
 Add to your project's `.claude/settings.json`:
@@ -74,7 +95,8 @@ Add to your project's `.claude/settings.json`:
   },
   "enabledPlugins": {
     "langgraph-dev@agentic-toolkit": true,
-    "dev-practices@agentic-toolkit": true
+    "dev-practices@agentic-toolkit": true,
+    "plugin-qa@agentic-toolkit": true
   }
 }
 ```

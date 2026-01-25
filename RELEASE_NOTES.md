@@ -1,5 +1,73 @@
 # Release Notes
 
+## v0.3.0 - Plugin-QA Addition (2026-01-25)
+
+### 🎉 New Plugin: plugin-qa
+
+Added **plugin-qa** plugin for quality assurance of Claude Code plugins and skills:
+
+- **Skill Perfection** (`plugin-qa-skill-perfection`) - Audit and fix plugin skills in a single pass. Verifies content against official documentation, fixes issues immediately as they're found, and produces concise verification reports. Includes optional Python syntax preflight script for Python-heavy skills.
+
+- **QA Audit** (`plugin-qa-skill-qa-audit`) - Comprehensive QA verification of plugin skills. Systematically verifies every line of instruction, code example, and claim against official documentation. Produces detailed audit reports with severity ratings, verification statistics, and quality metrics.
+
+**Features:**
+- Audit + fix in single pass (skill-perfection)
+- Comprehensive verification reporting (skill-qa-audit)
+- Official documentation verification with source citations
+- Severity-based issue categorization (Critical/High/Medium/Low)
+- Code completeness, syntax, and API accuracy validation
+- Documentation link verification
+- Python syntax preflight script (optional, advisory)
+- Quality metrics and scoring
+
+**Use Cases:**
+- Validate skills before publishing
+- Check for deprecated APIs and outdated documentation
+- Verify code examples are complete and executable
+- Ensure documentation accuracy
+- Systematic quality review with detailed reporting
+
+### 📦 Installation
+
+```bash
+# Install plugin-qa
+/plugin install plugin-qa@agentic-toolkit
+
+# Or install all three plugins
+/plugin install langgraph-dev@agentic-toolkit dev-practices@agentic-toolkit plugin-qa@agentic-toolkit
+```
+
+### 🔧 Team Auto-Install
+
+Update your project's `.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "agentic-toolkit": {
+      "source": {
+        "source": "github",
+        "repo": "postindustria-tech/agentic-toolkit"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "langgraph-dev@agentic-toolkit": true,
+    "dev-practices@agentic-toolkit": true,
+    "plugin-qa@agentic-toolkit": true
+  }
+}
+```
+
+### 📊 Plugin Status
+
+**Plugin-QA (v0.1.0):**
+- 2 skills - Production ready
+- Complementary to Anthropic's plugin-dev
+- Focus on quality assurance vs creation
+
+---
+
 ## v0.2.0 - Plugin Namespacing & Dev-Practices Addition (2026-01-22)
 
 ### 🎉 New Plugin: dev-practices
