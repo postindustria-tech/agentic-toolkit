@@ -1,5 +1,5 @@
 ---
-name: dev-practices-reclassify
+name: reclassify
 description: >
   Reclassify obligation layers (behavioral vs schema) to shrink the test
   obligation allowlist without writing integration tests. Use when asked to

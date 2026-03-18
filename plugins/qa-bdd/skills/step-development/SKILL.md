@@ -1,5 +1,5 @@
 ---
-name: qa-bdd-step-development
+name: step-development
 description: >
   BDD step development workflow for pytest-bdd projects. Use when you need to
   "develop BDD steps", "wire missing steps", "implement step definitions",

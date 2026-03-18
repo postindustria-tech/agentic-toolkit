@@ -1,5 +1,5 @@
 ---
-name: dev-practices-remediate
+name: remediate
 description: >
   Fill test stubs in entity test suites systematically. Use when asked to
   "remediate tests", "fill test stubs", "convert stubs to tests", "entity

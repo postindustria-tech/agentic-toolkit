@@ -1,5 +1,5 @@
 ---
-name: dev-practices-execute
+name: execute
 description: >
   Execute beads tasks through the full lifecycle using molecular workflow.
   Use when asked to "execute tasks", "mol-execute", "run molecular workflow",

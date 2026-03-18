@@ -1,5 +1,5 @@
 ---
-name: dev-practices-obligation-test
+name: obligation-test
 description: >
   Write per-obligation behavioral tests with hard quality enforcement. Use when
   asked to "obligation test", "write obligation tests", "cover obligations",

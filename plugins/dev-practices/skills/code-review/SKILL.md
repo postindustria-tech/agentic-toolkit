@@ -1,5 +1,5 @@
 ---
-name: dev-practices-code-review
+name: code-review
 description: >
   Launch multi-agent code review covering architecture, security, testing, and
   consistency. Use when asked to "code review", "review code", "audit code",

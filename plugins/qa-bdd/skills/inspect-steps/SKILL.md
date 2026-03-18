@@ -1,5 +1,5 @@
 ---
-name: qa-bdd-inspect-steps
+name: inspect-steps
 description: >
   Context-aware BDD step assertion completeness inspector. Use when you need to
   "inspect BDD steps", "audit step assertions", "check BDD assertion completeness",

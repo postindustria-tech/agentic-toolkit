@@ -1,5 +1,5 @@
 ---
-name: dev-practices-test-audit
+name: test-audit
 description: >
   Audit non-obligation tests to classify each assertion's source of truth. Use
   when asked to "audit tests", "test audit", "classify test assertions", "test

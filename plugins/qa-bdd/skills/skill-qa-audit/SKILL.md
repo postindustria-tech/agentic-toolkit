@@ -1,5 +1,5 @@
 ---
-name: qa-bdd-skill-qa-audit
+name: skill-qa-audit
 description: "This skill should be used when you need to \"audit a skill\", \"verify skill quality\", \"QA check skill\", \"validate skill file\", \"check for deprecated APIs\", \"verify code examples\". Performs comprehensive QA verification by checking every line of instruction, code example, and claim against official documentation. Produces structured audit reports with severity ratings."
 version: 1.0.0
 ---
