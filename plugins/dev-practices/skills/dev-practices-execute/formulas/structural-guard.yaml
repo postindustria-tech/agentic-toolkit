@@ -1,0 +1,125 @@
+name: structural-guard
+description: >
+  Create AST-scanning structural enforcement tests that catch categories of
+  architecture violations automatically on every quality check run. Each guard
+  follows the same pattern: research the principle, scan the codebase for
+  violations, write an enforcement test, mark known violations with an
+  allowlist (that shrinks, never grows), and verify.
+
+variables:
+  GUARD_NAMES:
+    description: "Space-separated guard names to create"
+    required: true
+
+labels:
+  - "mol:structural-guard"
+
+iterate:
+  over: "GUARD_NAMES"
+  item_var: "GUARD_NAME"
+  all_var: "ALL_GUARDS"
+  count_var: "N"
+  barrier_label: "atom:commit"
+  atoms:
+    # -- Atom 1: Research Principle --------------------------------------------
+    - id: "research-{GUARD_NAME}"
+      title: "Research principle for {GUARD_NAME} guard"
+      description: |
+        Understand the architectural principle that the {GUARD_NAME} guard
+        should enforce.
+
+        ## Instructions
+
+        1. Identify the principle for guard `{GUARD_NAME}`
+        2. Read existing structural tests for patterns to follow
+        3. Read the architecture documentation
+        4. Determine scanning approach: AST-based, introspection-based, or hybrid
+
+        ## Store Research
+
+        Write the implementation plan to the bead design field.
+
+      acceptance: "Research complete. Principle defined. Scanning approach chosen."
+      labels: ["atom:research"]
+
+    # -- Atom 2: Scan Violations -----------------------------------------------
+    - id: "scan-{GUARD_NAME}"
+      title: "Scan codebase for {GUARD_NAME} violations"
+      description: |
+        Scan the entire codebase for current violations. This creates the
+        initial allowlist of known violations.
+
+        1. Run the scan using Grep/Read
+        2. Classify each violation: FIXABLE_NOW / FIXABLE_LATER / ARCHITECTURAL
+        3. Build the allowlist
+        4. File beads tasks for FIXABLE_LATER violations
+
+      acceptance: "All violations cataloged. Beads tasks filed for FIXABLE_LATER items."
+      depends_on: ["research-{GUARD_NAME}"]
+      labels: ["atom:scan"]
+
+    # -- Atom 3: Write Guard Test ----------------------------------------------
+    - id: "write-guard-{GUARD_NAME}"
+      title: "Write guard test for {GUARD_NAME}"
+      description: |
+        Write the structural enforcement test.
+
+        ## Instructions
+
+        1. Follow existing structural test patterns
+        2. Include the allowlist as a module-level constant
+        3. The test should flag any violation NOT in the allowlist as FAILURE
+        4. Run the test -- it should PASS (all violations are allowlisted)
+        5. Verify it catches new violations
+
+      acceptance: "Guard test exists and passes. Catches new violations."
+      depends_on: ["scan-{GUARD_NAME}"]
+      labels: ["atom:write-guard"]
+
+    # -- Atom 4: Mark Known Violations -----------------------------------------
+    - id: "mark-known-{GUARD_NAME}"
+      title: "Mark known {GUARD_NAME} violations in source"
+      description: |
+        Add FIXME comments in source code for each known violation,
+        linking to the beads task that will fix it.
+
+      acceptance: "FIXME comments added. Guard test still passes."
+      depends_on: ["write-guard-{GUARD_NAME}"]
+      labels: ["atom:mark-known"]
+
+    # -- Atom 5: Verify -------------------------------------------------------
+    - id: "verify-{GUARD_NAME}"
+      title: "Verify {GUARD_NAME} guard in quality gate"
+      description: |
+        Run the full quality gate to confirm the guard integrates cleanly.
+
+        ```bash
+        make quality
+        ```
+
+      acceptance: "Quality command passes including the new guard test."
+      depends_on: ["mark-known-{GUARD_NAME}"]
+      labels: ["atom:verify"]
+
+    # -- Atom 6: Commit -------------------------------------------------------
+    - id: "commit-{GUARD_NAME}"
+      title: "Commit {GUARD_NAME} guard"
+      description: |
+        Commit the structural guard test and FIXME annotations.
+
+      acceptance: "Git commit exists for {GUARD_NAME} guard."
+      depends_on: ["verify-{GUARD_NAME}"]
+      depends_on_prev_barrier: true
+      labels: ["atom:commit"]
+
+finalize:
+  - id: sync-and-verify
+    title: "Sync beads and verify all {N} guards"
+    description: |
+      1. `bd sync`
+      2. Run full quality gate
+      3. Verify git state
+
+    acceptance: "All {N} guards committed and passing. bd sync done."
+    depends_on_all_barriers: true
+    labels: ["atom:verify"]

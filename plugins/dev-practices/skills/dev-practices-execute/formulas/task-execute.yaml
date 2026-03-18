@@ -1,0 +1,309 @@
+name: task-execute
+description: >
+  Execute beads tasks through the full lifecycle: research, architect review,
+  triage, implementation, and commit. Each atom is self-contained -- all research
+  findings are stored in the beads task itself (notes + design fields), making
+  every task a complete unit of context.
+
+variables:
+  TASK_IDS:
+    description: "Space-separated beads task IDs to execute"
+    required: true
+
+labels:
+  - "mol:task-execute"
+
+# -- Setup (runs once before any task iteration) -------------------------------
+setup:
+  - id: "baseline"
+    title: "Establish baseline -- zero failures"
+    description: |
+      Run the full quality suite BEFORE any code changes. This establishes the
+      clean slate. Every failure after this point belongs to you.
+
+      ## Instructions
+
+      1. **Run quality gate**:
+         ```bash
+         make quality 2>&1 | tail -5
+         ```
+         Record the exact pass count.
+
+      2. **Run integration tests** (if your project has them):
+         Run the project's integration test command and record pass count.
+
+      ## Gate -- HARD STOP on any failure
+
+      If ANY test fails in the baseline:
+      - Do NOT proceed to the next atom.
+      - Do NOT classify failures as "pre-existing" or "from another agent."
+      - Report the exact failures and leave this atom OPEN.
+
+      ## Record Baseline
+
+      ```bash
+      bd update {EPIC_ID} --append-notes "## Baseline (pre-change)
+      - Quality check: [N] passed, 0 failed
+      - Integration: [N] passed, 0 failed
+      - Total: [sum] passed, 0 failed"
+      ```
+
+    acceptance: "All gates pass with zero failures. Exact counts recorded in epic notes."
+    labels: ["atom:baseline"]
+
+iterate:
+  over: "TASK_IDS"
+  item_var: "TASK_ID"
+  all_var: "ALL_TASKS"
+  count_var: "N"
+  barrier_label: "atom:commit"
+  atoms:
+    # -- Atom 1: Research ------------------------------------------------------
+    - id: "research-{TASK_ID}"
+      title: "Research {TASK_ID}"
+      description: |
+        Execute research for beads task {TASK_ID}. All findings go into the
+        bead itself -- NOT the filesystem.
+
+        ## Instructions
+
+        1. **Read the task**: `bd show {TASK_ID}`
+        2. **Spec check** (if task touches schemas/protocol):
+           - Read relevant specs and schemas
+           - Check required vs optional, type constraints
+        3. **Explore the codebase**:
+           - Search for relevant code
+           - Read files that will need modification
+           - Check existing tests for the affected area
+           - Find 2-3 similar implementations to follow as patterns
+        4. **Check documentation** (doc-first rule)
+        5. **Engineering checklist** -- answer concretely:
+           - DRY: Does similar logic exist?
+           - Library idioms: How do your frameworks solve this?
+           - Data flow trace: Walk one concrete example through the full chain
+           - Existing conventions: What pattern do similar implementations follow?
+           - Test infrastructure: What fixtures/helpers exist?
+        6. **Identify architecture decisions**
+        7. **Extract the core invariant** -- State in ONE sentence the architectural
+           principle that ALL changes for this task must preserve.
+
+        ## Store Research in the Bead
+
+        ```bash
+        bd update {TASK_ID} --append-notes "## Findings
+        - [key findings]
+
+        ## Relevant Code
+        - path/to/file.py:line -- [description]
+
+        ## Risks & Edge Cases
+        - [potential issues]"
+
+        bd update {TASK_ID} --design "## Core Invariant
+        [One sentence: the architectural principle every change must preserve]
+
+        ## Implementation Plan
+        1. [first step]
+        2. [second step]"
+        ```
+
+        ## Gate: Add Label
+
+        ONLY after notes AND design are written:
+        ```bash
+        bd label add {TASK_ID} research:complete
+        ```
+
+      acceptance: "Task has research:complete label. Notes contain Findings. Design contains Core Invariant + Implementation Plan."
+      depends_on: ["baseline"]
+      labels: ["atom:research"]
+
+    # -- Atom 2: Architect Review ----------------------------------------------
+    - id: "review-{TASK_ID}"
+      title: "Architect review of {TASK_ID}"
+      description: |
+        Pragmatic architect review of the research findings for {TASK_ID}.
+
+        ## Precondition
+
+        Run `bd show {TASK_ID}` and verify research:complete label is present.
+
+        ## Review Criteria
+
+        1. **Invariant alignment**: Does EVERY step maintain the Core Invariant?
+        2. **Approach soundness**: Will the plan work?
+        3. **Risk coverage**: Are risks identified and covered?
+        4. **Pattern compliance**: Does the plan follow project architecture patterns?
+        5. **Specificity**: Is the plan specific enough to implement without guessing?
+        6. **Alternatives**: Was a better approach missed?
+
+        ## Rate Each Finding
+
+        - **LOW**: Minor suggestion, cosmetic, nice-to-have
+        - **MEDIUM**: Real concern but agent can resolve autonomously
+        - **HIGH**: Fundamental issue -- user input required
+
+        ## Write Review
+
+        ```bash
+        bd update {TASK_ID} --append-notes "## Architect Review
+        - [RATING] Finding: [description]. Suggestion: [what to do]
+
+        Overall: [ALL_LOW | NEEDS_REFINEMENT | NEEDS_USER_INPUT]"
+        ```
+
+      acceptance: "Review written to task notes with rated findings and overall verdict."
+      depends_on: ["research-{TASK_ID}"]
+      labels: ["atom:review", "atom:gate"]
+
+    # -- Atom 3: Triage --------------------------------------------------------
+    - id: "triage-{TASK_ID}"
+      title: "Triage review findings for {TASK_ID}"
+      description: |
+        Read the architect review and decide next steps for {TASK_ID}.
+        This is a TRIAGE atom -- it routes, not executes.
+
+        ### If ALL_LOW:
+        Note "Clean review -- proceeding to implement." Close this atom.
+
+        ### If NEEDS_REFINEMENT:
+        Create a refine atom addressing MEDIUM findings.
+
+        ### If NEEDS_USER_INPUT:
+        Block for human direction. Leave this atom OPEN.
+
+        ## Key Principle
+        Triage ROUTES work. It does not DO work.
+
+      acceptance: "Verdict acted on."
+      depends_on: ["review-{TASK_ID}"]
+      labels: ["atom:triage"]
+
+    # -- Atom 4: Write Regression Test (TDD Red) ------------------------------
+    - id: "write-test-{TASK_ID}"
+      title: "Write regression test for {TASK_ID}"
+      description: |
+        Write a failing test that defines the expected behavior for {TASK_ID}.
+        This is the TDD "red" step -- the test MUST exist and MUST fail before
+        any implementation begins.
+
+        ## Instructions
+
+        1. Identify what to test from the implementation plan
+        2. Choose test level (prefer integration over unit when DB involved)
+        3. Write the failing test
+        4. Use test factories for test data (never inline model construction)
+        5. Run and confirm it fails for the RIGHT reason (AssertionError, not ImportError)
+
+        ## BANNED Patterns
+
+        - `pytest.mark.xfail` is BANNED in regression tests
+        - AST-scanning / source-code pattern tests are BANNED
+        - Direct DB session management in test code is BANNED
+
+        ## Verification: Paste the FAILED Output
+
+        You MUST see the word "FAILED" in pytest output.
+
+        ## Store Test Reference
+
+        ```bash
+        bd update {TASK_ID} --append-notes "## Regression Test
+        - Test: <test_path>::<test_name>
+        - Status: FAILING (expected -- TDD red step)
+        - Tests expected behavior: [one sentence]"
+        ```
+
+      acceptance: "Failing test exists. Test reference written to task notes."
+      depends_on: ["triage-{TASK_ID}"]
+      depends_on_prev_barrier: true
+      labels: ["atom:write-test"]
+
+    # -- Atom 5: Implement (TDD Green + Refactor) -----------------------------
+    - id: "implement-{TASK_ID}"
+      title: "Implement {TASK_ID}"
+      description: |
+        Implement beads task {TASK_ID} -- make the failing test pass (TDD green),
+        then refactor.
+
+        ## Workflow
+
+        1. **Green**: Write minimum code to make the failing test pass
+        2. **Verify**: Run the SAME test that FAILED -- must now PASS
+        3. **Refactor**: With passing tests as safety net
+        4. **Quality gate**: Run project quality command
+
+        ## When EXISTING Tests Fail
+
+        1. STOP. Do NOT modify the failing tests.
+        2. Re-read the Core Invariant.
+        3. If your approach violates the invariant -> revert and rethink.
+        4. If the test has a genuine bug -> document WHY before modifying.
+
+        Sacred rule: NEVER adjust tests to match code without justification.
+
+        ## If Successful
+
+        Close the original beads task:
+        ```bash
+        bd close {TASK_ID}
+        ```
+
+      acceptance: "Quality command passes. Regression test passes. Original task closed."
+      depends_on: ["write-test-{TASK_ID}"]
+      labels: ["atom:implement"]
+
+    # -- Atom 6: Commit --------------------------------------------------------
+    - id: "commit-{TASK_ID}"
+      title: "Commit implementation for {TASK_ID}"
+      description: |
+        Commit the implementation for {TASK_ID}.
+
+        ## Instructions
+
+        1. Review changes: `git status` and `git diff --stat`
+        2. Stage specific files (never `git add .`)
+        3. Commit with conventional commit message
+        4. Verify: `git log -1 --oneline`
+
+      acceptance: "Git commit exists for {TASK_ID} implementation."
+      depends_on: ["implement-{TASK_ID}"]
+      labels: ["atom:commit"]
+
+# -- Finalize (after all tasks) ------------------------------------------------
+finalize:
+  - id: verify-no-regression
+    title: "Verify zero regressions vs baseline"
+    description: |
+      Compare final test results against the baseline.
+
+      ## Instructions
+
+      1. Read the baseline from the epic: `bd show {EPIC_ID}`
+      2. Run the full test suite
+      3. Compare counts: passes >= baseline, failures = 0
+      4. Record final results in epic notes
+
+      ## HARD STOP -- Test Integrity (ZERO TOLERANCE)
+
+      If ANY test fails:
+      - Do NOT close this atom.
+      - Do NOT use --ignore, -k "not ...", or --deselect.
+      - Fix the regressions first.
+
+    acceptance: "All gates pass. Zero regressions vs baseline."
+    depends_on_all_barriers: true
+    labels: ["atom:verify-regression"]
+
+  - id: sync-and-verify
+    title: "Sync beads and verify clean state"
+    description: |
+      Final cleanup after all {N} tasks.
+
+      1. `bd sync`
+      2. Verify all tasks are closed: `bd show {ALL_TASKS}`
+      3. Check git state: `git status`
+
+    acceptance: "All {N} tasks closed. bd sync done. git clean."
+    depends_on: ["verify-no-regression"]
+    labels: ["atom:verify"]

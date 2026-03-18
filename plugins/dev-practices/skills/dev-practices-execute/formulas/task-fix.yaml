@@ -1,0 +1,163 @@
+name: task-fix
+description: >
+  Formula for fixing well-defined code issues with a SEPARATE verify gate.
+  Four atoms per task: prep -> implement -> verify -> commit. The verify atom
+  runs guards independently from implementation -- the agent cannot close it
+  without proving the specific fix landed.
+
+  Total atoms: 1 (baseline) + 4N (per task) + 1 (verify-final) = 4N + 2.
+  Compare task-single at 3N + 2, task-execute at 7N + 2.
+
+  Use when:
+  - Each task has a precise description of what's wrong and what "fixed" means
+  - Existing guards provide mechanical verification
+  - No research or architect review needed
+  - The fix is code-level (assertion logic, conditional guards, etc.)
+
+variables:
+  TASK_IDS:
+    description: "Space-separated beads task IDs to fix"
+    required: true
+
+labels:
+  - "mol:task-fix"
+
+# -- Setup (runs once) --------------------------------------------------------
+setup:
+  - id: "baseline"
+    title: "Verify clean baseline"
+    description: |
+      Run quality gates BEFORE any code changes to confirm clean state.
+
+      ## Instructions
+
+      1. **Run quality gate**:
+         ```bash
+         make quality 2>&1 | tail -5
+         ```
+         Record the exact pass count.
+
+      2. **Run relevant guard tests specifically** (if applicable):
+         Run project-specific structural guard tests and record which pass.
+
+      ## Gate -- HARD STOP on any failure
+
+      If ANY test fails in the baseline, STOP.
+
+      ## Record Baseline
+
+      ```bash
+      bd update {EPIC_ID} --append-notes "## Baseline
+      - Quality check: [N] passed, 0 failed
+      - Guards: [N] passed"
+      ```
+
+    acceptance: "Quality command passes. Guard counts recorded."
+    labels: ["atom:baseline"]
+
+# -- Per-task atoms ------------------------------------------------------------
+iterate:
+  over: "TASK_IDS"
+  item_var: "TASK_ID"
+  all_var: "ALL_TASKS"
+  count_var: "N"
+  barrier_label: "atom:commit"
+  atoms:
+
+    # -- Atom 1: Prep ----------------------------------------------------------
+    - id: "prep-{TASK_ID}"
+      title: "Prep {TASK_ID}"
+      description: |
+        Read the task and the affected function BEFORE making any changes.
+        This atom is READ-ONLY.
+
+        ## Instructions
+
+        1. Read the task: `bd show {TASK_ID}`
+        2. Read the affected function in its file
+        3. Read the guard tests that cover this function's patterns
+        4. Write a brief plan to the task notes
+
+      acceptance: "Task read. Function read. Plan written to task notes."
+      depends_on: ["baseline"]
+      labels: ["atom:prep"]
+
+    # -- Atom 2: Implement ----------------------------------------------------
+    - id: "implement-{TASK_ID}"
+      title: "Implement fix for {TASK_ID}"
+      description: |
+        Fix the specific weakness described in the task.
+
+        ## Instructions
+
+        1. Re-read the plan from `bd show {TASK_ID}`
+        2. Make the fix -- change ONLY what the task describes
+        3. Self-check: read the modified function back and confirm the
+           anti-pattern is GONE
+
+        ## Anti-Patterns
+        - Do NOT add unrelated improvements
+        - Do NOT replace one weak pattern with a different weak pattern
+        - Do NOT add conditional guards that silently degrade behavior
+
+      acceptance: "Function modified. Anti-pattern from task description is gone."
+      depends_on: ["prep-{TASK_ID}"]
+      labels: ["atom:implement"]
+
+    # -- Atom 3: Verify -------------------------------------------------------
+    - id: "verify-{TASK_ID}"
+      title: "Verify fix for {TASK_ID}"
+      description: |
+        Verify the fix is correct. This is a SEPARATE GATE.
+
+        ## Check 1: Quality command passes
+        ```bash
+        make quality 2>&1 | tail -5
+        ```
+
+        ## Check 2: Guard tests pass
+        Run relevant structural guard tests.
+
+        ## Check 3: Anti-pattern eliminated
+        Read the modified function and confirm the specific anti-pattern is GONE.
+
+        ## HARD STOP
+        Do NOT close this atom if any check fails.
+
+      acceptance: "Quality command passes. Guards pass. Anti-pattern confirmed eliminated."
+      depends_on: ["implement-{TASK_ID}"]
+      labels: ["atom:verify"]
+
+    # -- Atom 4: Commit -------------------------------------------------------
+    - id: "commit-{TASK_ID}"
+      title: "Commit {TASK_ID}"
+      description: |
+        Stage, commit, and close the task.
+
+        1. Review changes: `git diff --stat`
+        2. Stage specific files
+        3. Commit with conventional commit message
+        4. Close the task: `bd close {TASK_ID}`
+
+      acceptance: "Commit exists. Task closed."
+      depends_on: ["verify-{TASK_ID}"]
+      labels: ["atom:commit"]
+
+# -- Finalize ------------------------------------------------------------------
+finalize:
+  - id: "verify-final"
+    title: "Final verification"
+    description: |
+      After all {N} tasks, verify zero regressions.
+
+      1. Run full quality gate
+      2. Compare against baseline
+      3. Sync beads: `bd sync`
+      4. Record final results
+
+      ## HARD STOP
+      If ANY test fails: fix it. Do NOT close with failures.
+
+    acceptance: "Quality command passes. Zero regressions. Beads synced."
+    depends_on_all_barriers: true
+    labels: ["atom:verify"]

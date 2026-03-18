@@ -1,0 +1,89 @@
+name: migration-audit
+description: >
+  Repeatable code review workflow for auditing code changes. Inventories
+  changed files by architectural layer, performs focused code reviews per layer,
+  consolidates findings, and files beads issues for each finding. Designed to
+  be re-run after each remediation batch to track progress.
+
+variables:
+  AUDIT_TARGET:
+    description: "Git commit range, branch name, or 'full' for complete codebase audit (e.g., 'main..HEAD', 'feature/branch', 'full')"
+    required: true
+
+labels:
+  - "mol:migration-audit"
+
+setup:
+  # -- Atom 1: Inventory Changes -----------------------------------------------
+  - id: inventory-changes
+    title: "Inventory changes for {AUDIT_TARGET}"
+    description: |
+      Catalog all changed files and classify them by architectural layer.
+
+      ## Instructions
+
+      1. Get the change list (git diff or full inventory)
+      2. Classify each file by layer:
+         - Schema: model/type definitions
+         - Business: business logic functions
+         - Boundary: API wrappers, transport handlers
+         - Transport: protocol-specific code
+         - Adapter: external integration code
+         - Database: ORM models, migrations
+         - Test: all test files
+      3. Record the inventory with cross-layer files flagged
+
+    acceptance: "All changed files classified by layer. Cross-layer files flagged."
+    labels: ["atom:inventory"]
+
+  # -- Atom 2: Review Per Layer ------------------------------------------------
+  - id: review-per-layer
+    title: "Review each layer for {AUDIT_TARGET}"
+    description: |
+      For each architectural layer with changes, perform a focused code review
+      against the project's documented architecture patterns and constraints.
+
+    acceptance: "Each layer with changes reviewed. Findings recorded with severity."
+    depends_on: [inventory-changes]
+    labels: ["atom:review"]
+
+  # -- Atom 3: Consolidate ----------------------------------------------------
+  - id: consolidate
+    title: "Consolidate audit findings for {AUDIT_TARGET}"
+    description: |
+      Merge findings across layers, deduplicate, cross-reference with
+      existing beads issues and test obligations. Prioritize and write
+      consolidated report.
+
+    acceptance: "Consolidated report written. Findings deduplicated and prioritized."
+    depends_on: [review-per-layer]
+    labels: ["atom:consolidate"]
+
+  # -- Atom 4: File Issues -----------------------------------------------------
+  - id: file-issues
+    title: "File beads issues for audit findings"
+    description: |
+      Create beads issues for each finding that doesn't already have one.
+
+      Priority mapping:
+      - CRITICAL -> P0 or P1
+      - HIGH -> P1 or P2
+      - MEDIUM -> P2 or P3
+      - LOW -> P3 or P4
+
+    acceptance: "Beads issues filed for all new findings."
+    depends_on: [consolidate]
+    labels: ["atom:file-issues", "atom:commit"]
+
+finalize:
+  - id: sync-and-report
+    title: "Commit audit report"
+    description: |
+      1. Stage audit documentation
+      2. Commit
+      3. Sync beads
+      4. Print summary
+
+    acceptance: "Audit report committed. Beads synced. All findings tracked."
+    depends_on_all_barriers: true
+    labels: ["atom:verify"]

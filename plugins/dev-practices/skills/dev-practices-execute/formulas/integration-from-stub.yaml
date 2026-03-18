@@ -1,0 +1,147 @@
+name: integration-from-stub
+description: >
+  Derive integration tests from existing unit test xfails and stubs.
+  Each xfail/stub defines the expected behavior (core invariant). The agent
+  writes an integration test with real database, fixes production code if it
+  fails, then reconciles the unit test.
+
+variables:
+  ENTITY_NAMES:
+    description: "Space-separated entity names (e.g., creative media-buy delivery)"
+    required: true
+
+labels:
+  - "mol:integration-from-stub"
+
+iterate:
+  over: "ENTITY_NAMES"
+  item_var: "ENTITY_NAME"
+  all_var: "ALL_ENTITIES"
+  count_var: "N"
+  barrier_label: "atom:commit"
+  atoms:
+    # -- Atom 1: Catalog Stubs ------------------------------------------------
+    - id: "catalog-{ENTITY_NAME}"
+      title: "Catalog xfail and stubs for {ENTITY_NAME}"
+      description: |
+        Read the entity unit test suite and catalog all stubs that need
+        integration tests.
+
+        1. Read the unit test suite
+        2. Catalog xfail tests (Bucket A: requires real DB, Bucket B: not yet implemented)
+        3. Catalog unspecified tests that exercise DB-dependent behavior
+        4. Check existing integration tests for coverage
+        5. Select batch (all Bucket A + up to 10 high-value stubs)
+
+      acceptance: "All stubs cataloged. Batch selected."
+      labels: ["atom:catalog"]
+
+    # -- Atom 2: Review Batch -------------------------------------------------
+    - id: "review-{ENTITY_NAME}"
+      title: "Review integration test plan for {ENTITY_NAME}"
+      description: |
+        Architect review of the batch: stub fidelity, fixture design,
+        batch scope, existing coverage check.
+
+      acceptance: "Review written with rated findings."
+      depends_on: ["catalog-{ENTITY_NAME}"]
+      labels: ["atom:review", "atom:gate"]
+
+    # -- Atom 3: Triage -------------------------------------------------------
+    - id: "triage-{ENTITY_NAME}"
+      title: "Triage review for {ENTITY_NAME} integration batch"
+      description: |
+        Route based on review verdict. ALL_LOW -> proceed.
+        NEEDS_REFINEMENT -> update plan. NEEDS_USER_INPUT -> block.
+
+      acceptance: "Verdict acted on."
+      depends_on: ["review-{ENTITY_NAME}"]
+      labels: ["atom:triage"]
+
+    # -- Atom 4: Architect Tests -----------------------------------------------
+    - id: "architect-{ENTITY_NAME}"
+      title: "Architect integration test design for {ENTITY_NAME}"
+      description: |
+        Analyze production code against architecture principles and design
+        integration tests that validate both stub behavior AND architectural
+        compliance.
+
+        Read architecture docs. For each test scenario, analyze layers,
+        error handling, data flow, and fixtures.
+
+      acceptance: "Layer boundaries mapped. Fixture hierarchy designed. Test-by-test plan ready."
+      depends_on: ["triage-{ENTITY_NAME}"]
+      labels: ["atom:architect"]
+
+    # -- Atom 5: Write Integration Tests ---------------------------------------
+    - id: "write-integration-{ENTITY_NAME}"
+      title: "Write integration tests for {ENTITY_NAME}"
+      description: |
+        Write integration tests following the architecture plan.
+
+        ## Iron Rule: Stub Intent Is Absolute Truth
+
+        The unit test stub defines WHAT to test. If the integration test
+        fails, the production code is wrong -- not the stub.
+
+      acceptance: "All batch stubs have integration test equivalents."
+      depends_on: ["architect-{ENTITY_NAME}"]
+      depends_on_prev_barrier: true
+      labels: ["atom:write-integration"]
+
+    # -- Atom 6: Fix Production Code ------------------------------------------
+    - id: "fix-green-{ENTITY_NAME}"
+      title: "Fix production code for {ENTITY_NAME} integration tests"
+      description: |
+        Make failing integration tests pass by fixing production code.
+
+        If an integration test fails, the production code is wrong. Do NOT
+        adjust the test to match current behavior.
+
+      acceptance: "All integration tests pass. Quality command passes."
+      depends_on: ["write-integration-{ENTITY_NAME}"]
+      labels: ["atom:fix-green"]
+
+    # -- Atom 7: Reconcile xfails ---------------------------------------------
+    - id: "reconcile-{ENTITY_NAME}"
+      title: "Reconcile xfails for {ENTITY_NAME}"
+      description: |
+        Now that integration tests pass, reconcile the unit test xfails:
+        remove xfail if unit test passes, update mocks if needed, or
+        mark as integration-only.
+
+      acceptance: "All Bucket A xfails reconciled."
+      depends_on: ["fix-green-{ENTITY_NAME}"]
+      labels: ["atom:reconcile"]
+
+    # -- Atom 8: Verify -------------------------------------------------------
+    - id: "verify-{ENTITY_NAME}"
+      title: "Verify {ENTITY_NAME} integration batch"
+      description: |
+        Full verification: quality command + integration tests + xfail count.
+
+      acceptance: "Quality command passes. Integration tests pass."
+      depends_on: ["reconcile-{ENTITY_NAME}"]
+      labels: ["atom:verify"]
+
+    # -- Atom 9: Commit -------------------------------------------------------
+    - id: "commit-{ENTITY_NAME}"
+      title: "Commit {ENTITY_NAME} integration tests"
+      description: |
+        Commit integration tests and production code fixes.
+
+      acceptance: "Git commit exists."
+      depends_on: ["verify-{ENTITY_NAME}"]
+      labels: ["atom:commit"]
+
+finalize:
+  - id: integration-report
+    title: "Integration test report for all {N} entities"
+    description: |
+      1. Run full test suite
+      2. Count remaining xfails
+      3. Sync beads
+
+    acceptance: "All {N} entities have integration tests. Full suite passes."
+    depends_on_all_barriers: true
+    labels: ["atom:verify"]

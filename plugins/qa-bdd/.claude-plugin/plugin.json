@@ -1,0 +1,26 @@
+{
+  "name": "qa-bdd",
+  "version": "0.2.0",
+  "description": "BDD quality assurance tools for pytest-bdd projects. Provides systematic methodologies for auditing step definitions, inspecting assertion completeness, developing new steps, and enforcing BDD code quality with ast-grep rules.",
+  "author": {
+    "name": "Konst",
+    "email": "oss@postindustria.com"
+  },
+  "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
+  "repository": "https://github.com/postindustria-tech/agentic-toolkit",
+  "keywords": [
+    "quality-assurance",
+    "qa",
+    "bdd",
+    "pytest-bdd",
+    "gherkin",
+    "step-definitions",
+    "assertion-completeness",
+    "skill-verification",
+    "code-audit",
+    "ast-grep",
+    "testing-tools",
+    "validation"
+  ],
+  "license": "MIT"
+}

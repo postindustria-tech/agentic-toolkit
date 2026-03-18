@@ -1,0 +1,10 @@
+id: bdd-no-ctx-get-env
+language: python
+rule:
+  pattern: ctx.get("env")
+files:
+  - "tests/bdd/steps/**"
+message: |
+  Use ctx["env"] -- guaranteed by autouse fixture.
+  ctx.get("env") masks missing harness setup and causes silent failures.
+severity: error

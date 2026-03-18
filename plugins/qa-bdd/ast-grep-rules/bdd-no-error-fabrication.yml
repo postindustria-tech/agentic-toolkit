@@ -1,0 +1,10 @@
+id: bdd-no-error-fabrication
+language: python
+rule:
+  pattern: ctx["error"] = AdCPError($$$)
+files:
+  - "tests/bdd/steps/**"
+message: |
+  When steps must not fabricate errors. Call production code and catch
+  the real exception: try: _call(ctx, req=...) except Exception as exc: ctx["error"] = exc
+severity: error

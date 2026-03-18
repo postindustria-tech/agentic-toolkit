@@ -1,0 +1,164 @@
+name: bdd-step
+description: >
+  Per-batch BDD step implementation. Each batch of missing steps goes through
+  research -> architect review -> triage -> write -> verify -> commit.
+
+variables:
+  BATCH_IDS:
+    description: "Space-separated beads task IDs for step batches"
+    required: true
+
+labels:
+  - "mol:bdd-step"
+
+# -- Setup --------------------------------------------------------------------
+setup:
+  - id: "baseline"
+    title: "Establish BDD baseline -- zero failures"
+    description: |
+      Run quality suite BEFORE any step changes. This is the clean slate.
+
+      1. Run quality gate and record pass count
+      2. Run BDD tests and record pass/xfail/skip counts
+
+      ## Gate -- HARD STOP on any failure
+
+      ## Record Baseline
+
+      ```bash
+      bd update {EPIC_ID} --append-notes "## Baseline (pre-change)
+      - Quality check: [N] passed, 0 failed
+      - BDD: [N] passed, [N] xfailed, [N] skipped, 0 failed"
+      ```
+
+    acceptance: "Quality and BDD gates pass with zero failures."
+    labels: ["atom:baseline"]
+
+# -- Per-batch iteration -------------------------------------------------------
+iterate:
+  over: "BATCH_IDS"
+  item_var: "BATCH_ID"
+  all_var: "ALL_BATCHES"
+  count_var: "N"
+  barrier_label: "atom:commit"
+  atoms:
+    # -- Atom 1: Research ------------------------------------------------------
+    - id: "research-{BATCH_ID}"
+      title: "Research step batch {BATCH_ID}"
+      description: |
+        Understand the scenarios and decide how to wire the steps.
+
+        1. Read the batch task for missing step texts
+        2. Read the feature file scenarios
+        3. Read the harness environment
+        4. Read existing generic steps for reusable patterns
+        5. Read production code for the behavior being tested
+        6. Decide test level and wiring for each step
+
+        ## Gate
+        ```bash
+        bd label add {BATCH_ID} research:complete
+        ```
+
+      acceptance: "Task has research:complete. Notes contain findings. Design contains wiring plan."
+      depends_on: ["baseline"]
+      labels: ["atom:research"]
+
+    # -- Atom 2: Architect Review ----------------------------------------------
+    - id: "review-{BATCH_ID}"
+      title: "Architect review of step batch {BATCH_ID}"
+      description: |
+        Validate wiring decisions BEFORE any code is written.
+
+        Review: test level, wiring correctness, pattern compliance,
+        guard compliance, reuse check.
+
+      acceptance: "Review written with rated findings."
+      depends_on: ["research-{BATCH_ID}"]
+      labels: ["atom:review", "atom:gate"]
+
+    # -- Atom 3: Triage -------------------------------------------------------
+    - id: "triage-{BATCH_ID}"
+      title: "Triage review for step batch {BATCH_ID}"
+      description: |
+        Route based on verdict: ALL_LOW -> proceed, NEEDS_REFINEMENT ->
+        update plan, NEEDS_USER_INPUT -> block.
+
+      acceptance: "Verdict acted on."
+      depends_on: ["review-{BATCH_ID}"]
+      labels: ["atom:triage"]
+
+    # -- Atom 4: Write Steps ---------------------------------------------------
+    - id: "write-{BATCH_ID}"
+      title: "Write steps for batch {BATCH_ID}"
+      description: |
+        Implement the step definitions following the reviewed wiring plan.
+
+        For each step: follow the Given/When/Then patterns,
+        run self-check, run tests.
+
+      acceptance: "All steps written. Self-check passes. BDD scenarios run without ERROR."
+      depends_on: ["triage-{BATCH_ID}"]
+      depends_on_prev_barrier: true
+      labels: ["atom:write-steps"]
+
+    # -- Atom 5: Verify -------------------------------------------------------
+    - id: "verify-{BATCH_ID}"
+      title: "Verify step batch {BATCH_ID}"
+      description: |
+        Mechanical checks for the step implementation:
+
+        1. No silent environment access patterns
+        2. No bare truthiness assertions
+        3. No empty function bodies
+        4. No dict literals where factories should be used
+        5. No error fabrication in When steps
+        6. Test level matches research decision
+        7. Quality command passes
+
+      acceptance: "All checks pass. Zero guard violations."
+      depends_on: ["write-{BATCH_ID}"]
+      labels: ["atom:verify", "atom:gate"]
+
+    # -- Atom 6: Commit -------------------------------------------------------
+    - id: "commit-{BATCH_ID}"
+      title: "Commit steps for batch {BATCH_ID}"
+      description: |
+        Commit step definitions. Close the batch task.
+
+      acceptance: "Git commit exists. Batch task closed."
+      depends_on: ["verify-{BATCH_ID}"]
+      labels: ["atom:commit"]
+
+# -- Finalize ------------------------------------------------------------------
+finalize:
+  - id: code-review
+    title: "Code review of all BDD step changes"
+    description: |
+      Launch review agents scoped to BDD test directories.
+      Address Critical and High findings before closing.
+
+    acceptance: "Review agents completed. Critical/High findings addressed."
+    depends_on_all_barriers: true
+    labels: ["atom:code-review"]
+
+  - id: verify-no-regression
+    title: "Verify zero regressions vs baseline"
+    description: |
+      Compare final test results against baseline.
+      Passes >= baseline, failures = 0, xfails may decrease.
+
+    acceptance: "Zero regressions. Final counts recorded."
+    depends_on: ["code-review"]
+    labels: ["atom:verify-regression"]
+
+  - id: sync-and-verify
+    title: "Sync beads after all {N} step batches"
+    description: |
+      ```bash
+      bd sync
+      ```
+
+    acceptance: "All {N} batches closed. bd sync done. git clean."
+    depends_on: ["verify-no-regression"]
+    labels: ["atom:verify"]

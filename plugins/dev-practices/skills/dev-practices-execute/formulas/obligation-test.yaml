@@ -1,0 +1,123 @@
+name: obligation-test
+description: >
+  Per-obligation test derivation. Each obligation gets its own research ->
+  write -> verify -> commit chain with hard quality rules. Enforces deep
+  context and 6 mechanical quality checks per test.
+
+variables:
+  OBLIGATION_IDS:
+    description: "Space-separated obligation IDs to cover"
+    required: true
+
+labels:
+  - "mol:obligation-test"
+
+setup:
+  - id: baseline
+    title: "Baseline quality snapshot"
+    description: |
+      Record the current quality state before any obligation tests are written.
+
+      1. Run quality gate and record pass count
+      2. Record current allowlist size
+      3. Record current coverage count
+      4. Store baseline in epic notes
+
+    acceptance: "Quality command passes. Baseline counts recorded."
+    labels: ["atom:baseline"]
+
+iterate:
+  over: "OBLIGATION_IDS"
+  item_var: "OID"
+  all_var: "ALL_OIDS"
+  count_var: "N"
+  barrier_label: "atom:commit"
+  atoms:
+    # -- Atom 1: Research ------------------------------------------------------
+    - id: "research-{OID}"
+      title: "Research obligation {OID}"
+      description: |
+        Deeply understand the obligation before writing any test code.
+        Produce three mandatory sections: Understanding, Production Code, Test Strategy.
+
+        1. Find and read the scenario for {OID}
+        2. Extract Given/When/Then, business rule, priority, layer
+        3. Find the production function that implements this behavior
+        4. Decide: unit or integration? What mocks? What key assertion?
+
+        ## Store Research
+
+        Write findings to bead notes with all three sections.
+
+      acceptance: "All three sections present. Key assertion identified."
+      depends_on: ["baseline"]
+      labels: ["atom:research", "atom:gate"]
+
+    # -- Atom 2: Write Test ----------------------------------------------------
+    - id: "write-test-{OID}"
+      title: "Write obligation test for {OID}"
+      description: |
+        Write ONE test for obligation {OID}. Six hard rules:
+
+        | # | Rule |
+        |---|------|
+        | 1 | Import from project source |
+        | 2 | Call production function |
+        | 3 | Assert production output |
+        | 4 | Covers: {OID} tag |
+        | 5 | Use factories where applicable |
+        | 6 | Not mock-echo only |
+
+        Self-check all rules before closing. Run the test.
+
+      acceptance: "One test written following all 6 rules. Test runs without ERROR."
+      depends_on: ["research-{OID}"]
+      depends_on_prev_barrier: true
+      labels: ["atom:write-test"]
+
+    # -- Atom 3: Verify -------------------------------------------------------
+    - id: "verify-{OID}"
+      title: "Verify obligation test for {OID}"
+      description: |
+        Six mechanical checks:
+
+        1. Production import exists
+        2. Covers tag present and unique
+        3. Test runs without ERROR
+        4. Quality command passes
+        5. No duplicate Covers tags
+        6. If test PASSES: remove OID from allowlist, run obligation guard
+
+      acceptance: "All 6 checks pass. Allowlist updated if applicable."
+      depends_on: ["write-test-{OID}"]
+      labels: ["atom:verify", "atom:gate"]
+
+    # -- Atom 4: Commit -------------------------------------------------------
+    - id: "commit-{OID}"
+      title: "Commit obligation test for {OID}"
+      description: |
+        Commit the test and any allowlist changes.
+
+      acceptance: "Git commit exists for {OID}."
+      depends_on: ["verify-{OID}"]
+      labels: ["atom:commit"]
+
+finalize:
+  - id: verify-no-regression
+    title: "Verify no regressions across all {N} obligation tests"
+    description: |
+      Run quality command. Compare to baseline. Check allowlist shrinkage.
+
+    acceptance: "Quality command passes. No regressions. Allowlist reduced."
+    depends_on_all_barriers: true
+    labels: ["atom:verify-regression"]
+
+  - id: sync-and-verify
+    title: "Sync beads after all {N} obligation tests"
+    description: |
+      1. `bd sync`
+      2. Check clean state
+
+    acceptance: "bd sync complete. Working tree clean."
+    depends_on: ["verify-no-regression"]
+    labels: ["atom:verify"]

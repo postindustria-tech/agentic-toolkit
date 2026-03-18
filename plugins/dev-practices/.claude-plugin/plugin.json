@@ -1,7 +1,7 @@
 {
   "name": "dev-practices",
-  "version": "0.1.0",
-  "description": "Development practices and workflows for quality-driven software engineering. Provides test-driven development (TDD) and session completion workflows that integrate with beads task management for complete development lifecycle",
+  "version": "0.2.0",
+  "description": "Development practices and workflows for quality-driven software engineering. Provides TDD, session completion, molecular task execution with formula-based atom graphs, multi-agent code review, entity test remediation, obligation-driven test derivation, test source-of-truth auditing, and obligation reclassification. Integrates with beads task management for complete development lifecycle. Includes 5 specialized review agents for architecture, testing, DRY, consistency, layering, and Python practices.",
   "author": {
     "name": "Konst",
     "email": "oss@postindustria.com"
@@ -19,7 +19,13 @@
     "quality-assurance",
     "beads-integration",
     "code-review",
-    "architecture"
+    "architecture",
+    "molecular-workflow",
+    "formula-execution",
+    "obligation-testing",
+    "entity-remediation",
+    "test-audit",
+    "review-agents"
   ],
   "license": "MIT"
 }

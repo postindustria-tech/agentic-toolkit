@@ -1,0 +1,223 @@
+name: bug-triage
+description: >
+  Triage and fix bugs through a reproduction-first workflow: reproduce -> trace
+  similar -> architect review -> triage -> fix -> e2e verify -> commit. Each atom
+  is self-contained -- findings stored in the beads task itself.
+
+variables:
+  BUG_IDS:
+    description: "Space-separated beads bug task IDs to triage"
+    required: true
+
+labels:
+  - "mol:bug-triage"
+
+# -- Setup (runs once) --------------------------------------------------------
+setup:
+  - id: "baseline"
+    title: "Establish baseline -- zero failures"
+    description: |
+      Run the full quality suite BEFORE any code changes.
+
+      ## Instructions
+
+      1. **Run quality gate** and record pass count
+      2. **Run integration tests** (if applicable) and record pass count
+
+      ## Gate -- HARD STOP on any failure
+
+      If ANY test fails in the baseline, STOP.
+
+      ## Record Baseline
+
+      ```bash
+      bd update {EPIC_ID} --append-notes "## Baseline (pre-change)
+      - Quality check: [N] passed, 0 failed
+      - Integration: [N] passed, 0 failed"
+      ```
+
+    acceptance: "All gates pass with zero failures. Counts recorded."
+    labels: ["atom:baseline"]
+
+iterate:
+  over: "BUG_IDS"
+  item_var: "BUG_ID"
+  all_var: "ALL_BUGS"
+  count_var: "N"
+  barrier_label: "atom:commit"
+  atoms:
+    # -- Atom 1: Reproduce -----------------------------------------------------
+    - id: "reproduce-{BUG_ID}"
+      title: "Reproduce bug {BUG_ID}"
+      description: |
+        Write a failing test that demonstrates bug {BUG_ID} and trace the root cause.
+
+        ## Instructions
+
+        1. Read the task: `bd show {BUG_ID}`
+        2. Understand observed vs expected behavior
+        3. Trace the data flow to find where the bug manifests
+        4. Choose test level (prefer integration for DB-related bugs)
+        5. Write a failing test demonstrating the bug
+        6. Confirm root cause in one sentence
+
+        ## BANNED Patterns
+        - `pytest.mark.xfail` is BANNED -- regression tests must FAIL hard
+        - AST-scanning tests are BANNED -- test behavior, not code text
+        - Direct DB session management in tests is BANNED
+
+        ## Store Findings
+
+        ```bash
+        bd update {BUG_ID} --append-notes "## Reproduction
+        - Failing test: <path>::<name>
+        - Root cause: [one sentence]"
+
+        bd update {BUG_ID} --design "## Root Cause
+        [what is wrong and why]
+
+        ## Fix Approach
+        [minimal change needed]"
+        ```
+
+        ## Gate
+        ```bash
+        bd label add {BUG_ID} reproduce:complete
+        ```
+
+      acceptance: "Failing test exists. Root cause identified. reproduce:complete label added."
+      depends_on: ["baseline"]
+      labels: ["atom:reproduce"]
+
+    # -- Atom 2: Trace Similar -------------------------------------------------
+    - id: "trace-similar-{BUG_ID}"
+      title: "Trace similar patterns for {BUG_ID}"
+      description: |
+        Check if the same bug pattern exists elsewhere in the codebase.
+
+        1. Read the root cause from design field
+        2. Identify the bug pattern category
+        3. Search for the same pattern across the codebase
+        4. Document findings, file separate beads tasks if needed
+
+      acceptance: "Similar pattern analysis written to task notes."
+      depends_on: ["reproduce-{BUG_ID}"]
+      labels: ["atom:trace-similar"]
+
+    # -- Atom 3: Architect Review ----------------------------------------------
+    - id: "review-{BUG_ID}"
+      title: "Architect review of {BUG_ID}"
+      description: |
+        Review the proposed fix for correctness, minimality, and risk.
+
+        ## Review Criteria
+
+        1. Root cause correctness
+        2. Fix minimality
+        3. Regression risk
+        4. Architecture compliance
+        5. Similar bug scalability
+        6. Test coverage sufficiency
+
+        Rate findings: LOW / MEDIUM / HIGH.
+
+      acceptance: "Review written with rated findings and overall verdict."
+      depends_on: ["trace-similar-{BUG_ID}"]
+      labels: ["atom:review", "atom:gate"]
+
+    # -- Atom 4: Triage --------------------------------------------------------
+    - id: "triage-{BUG_ID}"
+      title: "Triage review findings for {BUG_ID}"
+      description: |
+        Route based on architect review verdict. This is a TRIAGE atom.
+
+        - ALL_LOW -> proceed to fix
+        - NEEDS_REFINEMENT -> spawn refine atom
+        - NEEDS_USER_INPUT -> block for human direction
+
+      acceptance: "Verdict acted on."
+      depends_on: ["review-{BUG_ID}"]
+      labels: ["atom:triage"]
+
+    # -- Atom 5: Fix -----------------------------------------------------------
+    - id: "fix-{BUG_ID}"
+      title: "Fix bug {BUG_ID}"
+      description: |
+        Apply the minimal fix for bug {BUG_ID}.
+
+        ## Workflow
+
+        1. Find the failing test from the reproduce atom
+        2. Verify the test still fails
+        3. Apply the minimal fix from design field
+        4. Verify fix (test must now PASS)
+        5. Mutation verify: temporarily revert, confirm test fails again
+        6. Run quality gate
+
+        ## When EXISTING Tests Fail
+
+        STOP. Don't modify failing tests. Check if fix is too broad.
+
+        ## If Successful
+        ```bash
+        bd close {BUG_ID}
+        ```
+
+      acceptance: "Quality command passes. Failing test now passes. Mutation verified. Bug closed."
+      depends_on: ["triage-{BUG_ID}"]
+      depends_on_prev_barrier: true
+      labels: ["atom:fix"]
+
+    # -- Atom 6: E2E Verify (Optional) ----------------------------------------
+    - id: "e2e-verify-{BUG_ID}"
+      title: "E2E verify fix for {BUG_ID}"
+      description: |
+        Optional verification against real systems.
+
+        Skip if bug is purely in business logic (no adapter/API interaction).
+        Execute if bug touches external APIs, serialization, or protocol behavior.
+
+      acceptance: "E2E verification completed, skipped with justification, or manual steps documented."
+      depends_on: ["fix-{BUG_ID}"]
+      labels: ["atom:e2e-verify"]
+
+    # -- Atom 7: Commit --------------------------------------------------------
+    - id: "commit-{BUG_ID}"
+      title: "Commit fix for {BUG_ID}"
+      description: |
+        Commit the bug fix.
+
+        1. Review changes
+        2. Stage specific files
+        3. Commit with `fix:` prefix
+        4. Verify
+
+      acceptance: "Git commit exists with fix: prefix."
+      depends_on: ["e2e-verify-{BUG_ID}"]
+      labels: ["atom:commit"]
+
+# -- Finalize ------------------------------------------------------------------
+finalize:
+  - id: verify-no-regression
+    title: "Verify zero regressions vs baseline"
+    description: |
+      Run full test suite and compare against baseline.
+
+      ## HARD STOP -- Test Integrity
+
+      If ANY test fails: fix it. Do NOT skip.
+
+    acceptance: "All gates pass. Zero regressions."
+    depends_on_all_barriers: true
+    labels: ["atom:verify-regression"]
+
+  - id: sync-and-verify
+    title: "Sync beads and verify clean state"
+    description: |
+      1. `bd sync`
+      2. Verify all bugs closed
+      3. Check git state
+
+    acceptance: "All {N} bugs closed. bd sync done. git clean."
+    depends_on: ["verify-no-regression"]
+    labels: ["atom:verify"]

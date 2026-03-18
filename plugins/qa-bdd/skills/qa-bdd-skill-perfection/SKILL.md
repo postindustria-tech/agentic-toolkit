@@ -1,5 +1,5 @@
 ---
-name: plugin-qa-skill-perfection
+name: qa-bdd-skill-perfection
 description: "This skill should be used when you need to \"audit and fix a skill\", \"perfect a skill\", \"QA fix skill file\", \"verify and improve skill\". Provides a methodology for verifying skill content against official documentation, fixing issues in-place, and producing verification reports in a single pass."
 version: 1.1.0
 ---

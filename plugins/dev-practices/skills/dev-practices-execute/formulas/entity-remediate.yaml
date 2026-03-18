@@ -1,0 +1,135 @@
+name: entity-remediate
+description: >
+  Systematically fill test stubs in entity test suites. Works batch-by-batch:
+  check the entity suite exists (hard gate), plan which stubs to implement,
+  write failing tests (TDD red), fix production code (TDD green), verify.
+
+variables:
+  ENTITY_NAMES:
+    description: "Space-separated entity names to remediate"
+    required: true
+
+labels:
+  - "mol:entity-remediate"
+
+iterate:
+  over: "ENTITY_NAMES"
+  item_var: "ENTITY_NAME"
+  all_var: "ALL_ENTITIES"
+  count_var: "N"
+  barrier_label: "atom:commit"
+  atoms:
+    # -- Atom 1: Pre-Check (Hard Gate) ----------------------------------------
+    - id: "pre-check-{ENTITY_NAME}"
+      title: "Pre-check entity suite for {ENTITY_NAME}"
+      description: |
+        **HARD GATE**: Verify the entity test suite exists before proceeding.
+        If it doesn't exist, STOP and suggest creating the surface map first.
+
+        1. Convert entity name to test file path
+        2. Check if the entity test suite exists
+        3. If NOT exists: STOP with message, leave atom OPEN
+        4. If EXISTS: count total tests, stubs, and real tests
+        5. If no stubs remain: note fully remediated, close atom
+
+      acceptance: "Entity test suite verified to exist. Stub count recorded."
+      labels: ["atom:pre-check", "atom:gate"]
+
+    # -- Atom 2: Plan Batch ---------------------------------------------------
+    - id: "plan-batch-{ENTITY_NAME}"
+      title: "Plan remediation batch for {ENTITY_NAME}"
+      description: |
+        Select which stubs to implement (5-15 per batch) and create plan.
+
+        1. List all stubs in the entity test suite
+        2. Read stub docstrings for priorities (P0 first)
+        3. Check for related beads bugs
+        4. Select batch and plan each stub
+
+      acceptance: "Batch selected with implementation plan."
+      depends_on: ["pre-check-{ENTITY_NAME}"]
+      labels: ["atom:plan"]
+
+    # -- Atom 3: Architect Review ---------------------------------------------
+    - id: "review-{ENTITY_NAME}"
+      title: "Review batch plan for {ENTITY_NAME}"
+      description: |
+        Review batch scope, test quality, code changes, bug alignment, and
+        priority order.
+
+      acceptance: "Review written with rated findings."
+      depends_on: ["plan-batch-{ENTITY_NAME}"]
+      labels: ["atom:review", "atom:gate"]
+
+    # -- Atom 4: Triage -------------------------------------------------------
+    - id: "triage-{ENTITY_NAME}"
+      title: "Triage review for {ENTITY_NAME} batch"
+      description: |
+        Route based on review verdict.
+
+      acceptance: "Verdict acted on."
+      depends_on: ["review-{ENTITY_NAME}"]
+      labels: ["atom:triage"]
+
+    # -- Atom 5: Implement Red ------------------------------------------------
+    - id: "implement-red-{ENTITY_NAME}"
+      title: "Implement failing tests for {ENTITY_NAME} batch"
+      description: |
+        Convert stubs into real failing tests (TDD red step).
+
+        ## Iron Rule: Stubs Are Absolute Truth
+
+        You MUST NOT drop, skip, or question any stub's expected behavior.
+        The code is what's wrong, not the stub.
+
+        For each stub:
+        1. Remove the skip decorator
+        2. Write the test implementation
+        3. Run and confirm it fails for the RIGHT reason
+
+      acceptance: "ALL batch stubs converted. ZERO stubs dropped."
+      depends_on: ["triage-{ENTITY_NAME}"]
+      depends_on_prev_barrier: true
+      labels: ["atom:implement-red"]
+
+    # -- Atom 6: Fix Green ----------------------------------------------------
+    - id: "fix-green-{ENTITY_NAME}"
+      title: "Fix production code for {ENTITY_NAME} batch"
+      description: |
+        Make the failing tests pass by fixing production code (TDD green).
+
+      acceptance: "All failing tests pass or are xfail with beads issues. Quality command passes."
+      depends_on: ["implement-red-{ENTITY_NAME}"]
+      labels: ["atom:fix-green"]
+
+    # -- Atom 7: Verify -------------------------------------------------------
+    - id: "verify-{ENTITY_NAME}"
+      title: "Verify {ENTITY_NAME} remediation batch"
+      description: |
+        Run quality gate. Count remaining stubs. Record batch summary.
+
+      acceptance: "Quality command passes. Remaining stubs counted."
+      depends_on: ["fix-green-{ENTITY_NAME}"]
+      labels: ["atom:verify"]
+
+    # -- Atom 8: Commit -------------------------------------------------------
+    - id: "commit-{ENTITY_NAME}"
+      title: "Commit {ENTITY_NAME} remediation batch"
+      description: |
+        Commit the remediation work.
+
+      acceptance: "Git commit exists."
+      depends_on: ["verify-{ENTITY_NAME}"]
+      labels: ["atom:commit"]
+
+finalize:
+  - id: sync-and-verify
+    title: "Sync and verify all {N} entity remediations"
+    description: |
+      1. `bd sync`
+      2. Count remaining stubs across all entities
+      3. Run quality gate
+
+    acceptance: "All {N} entities remediated. bd sync done. Quality command passes."
+    depends_on_all_barriers: true
+    labels: ["atom:verify"]

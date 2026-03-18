@@ -1,0 +1,10 @@
+id: bdd-no-hasattr-env
+language: python
+rule:
+  pattern: hasattr(env, $ARG)
+files:
+  - "tests/bdd/steps/**"
+message: |
+  Call env methods directly. If the env lacks a method, xfail the
+  scenario in conftest.py instead of degrading silently.
+severity: error
