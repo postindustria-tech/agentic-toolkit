@@ -61,10 +61,10 @@
       "license": "MIT"
     },
     {
-      "name": "plugin-qa",
-      "source": "./plugins/plugin-qa",
-      "description": "Quality assurance tools for Claude Code plugins and skills. Provides systematic methodologies for auditing, verifying, and perfecting plugin skills against official documentation with comprehensive reporting.",
-      "version": "0.1.0",
+      "name": "qa-bdd",
+      "source": "./plugins/qa-bdd",
+      "description": "BDD quality assurance tools for pytest-bdd projects. Context-aware step assertion inspection, step development workflows, and AST-based anti-pattern detection for behavioral test suites.",
+      "version": "0.2.0",
       "author": {
         "name": "Constantine Mirin",
         "email": "oss@postindustria.com"
