@@ -1,10 +1,10 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "agentic-toolkit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Complete toolkit for building agentic systems with LangGraph, DSPy, and modern AI workflows",
   "owner": {
-    "name": "Constantine Mirinh",
+    "name": "Constantine Mirin",
     "email": "oss@postindustria.com"
   },
   "plugins": [
@@ -37,7 +37,7 @@
       "name": "dev-practices",
       "source": "./plugins/dev-practices",
       "description": "Development practices and workflows for quality-driven software engineering. Provides test-driven development (TDD) and session completion workflows that integrate with beads task management for complete development lifecycle",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Constantine Mirin",
         "email": "oss@postindustria.com"
@@ -82,6 +82,32 @@
         "validation"
       ],
       "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
+      "repository": "https://github.com/postindustria-tech/agentic-toolkit",
+      "license": "MIT"
+    },
+    {
+      "name": "neograph-dev",
+      "source": "./plugins/neograph-dev",
+      "description": "Development toolkit for the neograph declarative LLM graph compiler. Codebase navigation, bug fix workflows, test design conventions, rendering architecture, and lint system guidance.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Constantine Mirin",
+        "email": "oss@postindustria.com"
+      },
+      "category": "development",
+      "keywords": [
+        "neograph",
+        "llm",
+        "graph-compiler",
+        "langgraph",
+        "declarative",
+        "pipeline",
+        "testing",
+        "lint",
+        "rendering",
+        "baml"
+      ],
+      "homepage": "https://neograph.pro",
       "repository": "https://github.com/postindustria-tech/agentic-toolkit",
       "license": "MIT"
     }
