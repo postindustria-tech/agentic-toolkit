@@ -1,0 +1,22 @@
+{
+  "name": "neograph-dev",
+  "version": "0.1.0",
+  "description": "Development toolkit for the neograph declarative LLM graph compiler. Provides codebase navigation, bug fix workflows, test design conventions, rendering architecture, and lint system guidance.",
+  "author": {
+    "name": "Postindustria Tech",
+    "email": "tech@postindustria.com"
+  },
+  "homepage": "https://neograph.pro",
+  "repository": "https://github.com/postindustria-tech/agentic-toolkit",
+  "keywords": [
+    "neograph",
+    "llm",
+    "graph-compiler",
+    "langgraph",
+    "declarative",
+    "pipeline",
+    "testing",
+    "lint"
+  ],
+  "license": "MIT"
+}
