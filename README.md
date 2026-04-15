@@ -1,6 +1,6 @@
 # Agentic Toolkit
 
-Claude Code plugin marketplace for building agentic systems with LangGraph, DSPy, and AI workflows.
+Claude Code plugin marketplace for building agentic systems. Four plugins covering LangGraph development, development practices, BDD quality assurance, and the neograph graph compiler.
 
 ## Installation
 
@@ -11,10 +11,8 @@ Claude Code plugin marketplace for building agentic systems with LangGraph, DSPy
 # Install specific plugins
 /plugin install langgraph-dev@agentic-toolkit
 /plugin install dev-practices@agentic-toolkit
-/plugin install plugin-qa@agentic-toolkit
-
-# Or install all
-/plugin install langgraph-dev@agentic-toolkit dev-practices@agentic-toolkit plugin-qa@agentic-toolkit
+/plugin install qa-bdd@agentic-toolkit
+/plugin install neograph-dev@agentic-toolkit
 ```
 
 **Upgrading from pi-dev?** See [UPGRADE.md](UPGRADE.md) for instructions.
@@ -25,59 +23,84 @@ Claude Code plugin marketplace for building agentic systems with LangGraph, DSPy
 
 Tutorial-grounded patterns and best practices for LangGraph development.
 
-**Status**: Skills are tested and ready to use. Commands and agent are work in progress.
+| Component | Count | Status |
+|-----------|-------|--------|
+| Skills | 21 | Production ready |
+| Commands | 5 | WIP |
+| Agents | 1 | WIP |
 
-**What's Included:**
-- **21 Skills** (Tested) - RAG, multi-agent, memory, streaming, testing, state management, tool calling, and more
-- **5 Commands** (WIP) - Generators for workflows, state schemas, tests, agents, deployments
-- **1 Agent** (WIP) - Workflow validator
+**Skills cover:** state management, conditional routing, conversation memory, ReAct agents, multi-agent supervisors, human-in-the-loop, streaming, structured output, subgraphs and composition, basic and corrective RAG, document processing, error recovery, parallel execution, performance optimization, prompt engineering, memory store and knowledge, deployment patterns, testing agentic systems.
 
-**Skills Cover:**
-- LangGraph fundamentals (state, graphs, routing, streaming)
-- Agent patterns (ReAct, multi-agent, tools)
-- RAG systems (basic, corrective, document processing)
-- Memory and context management
-- Testing and deployment
-- Error handling and optimization
+**Commands (WIP):** create-workflow, create-state, create-tests, create-agent, create-deployment.
 
-### Development Practices (`dev-practices`) - v0.1.0
+**Agent (WIP):** workflow-validator.
 
-Development practices and workflows for quality-driven software engineering.
+---
 
-**Status**: Production ready - both skills fully tested and documented.
+### Development Practices (`dev-practices`) - v0.2.0
 
-**What's Included:**
-- **2 Skills** (Production Ready) - Test-driven development and session completion workflows
-- **Beads Integration** - Seamlessly integrates with beads task management workflow
+Quality-driven development workflows with beads task management integration.
+
+| Component | Count | Status |
+|-----------|-------|--------|
+| Skills | 8 | Production ready |
+| Agents | 5 | Production ready |
 
 **Skills:**
-- **TDD Workflow** (`/dev-practices-tdd-workflow`) - Complete test-driven development cycle with sacred rule enforcement (tests define requirements, never adjust tests to match code). Includes language-specific patterns for Python, JavaScript, Go, TypeScript, and more
-- **Session Completion** (`/dev-practices-session-completion`) - End-of-session checklist ensuring no work is lost. Covers verification steps, git workflows, issue tracking integration, and proper push-to-remote procedures
 
-**Language Support:**
-- Python, JavaScript/TypeScript, Rust, Go, Ruby, Java
-- Verification patterns and quality gates for each language
-- CI/CD integration examples (GitHub Actions, pre-commit hooks)
+| Skill | Purpose |
+|-------|---------|
+| `execute` | Molecular task execution — atoms chained in sequence, survives context compaction |
+| `tdd-workflow` | Test-driven development cycle with sacred rule enforcement |
+| `session-completion` | End-of-session checklist ensuring no work is lost |
+| `code-review` | Multi-agent code review across 8 dimensions |
+| `obligation-test` | Per-obligation behavioral test derivation |
+| `remediate` | Fill entity test stubs batch-by-batch with TDD |
+| `test-audit` | Audit test sources of truth |
+| `reclassify` | Reclassify and reorganize tasks |
 
-### Plugin QA (`plugin-qa`) - v0.1.0
+**Review agents:** review-consistency, review-dry, review-layering, review-python-practices, review-testing.
 
-Quality assurance tools for validating and perfecting Claude Code plugin skills.
+---
 
-**Status**: Production ready - both skills tested and ready to use.
+### QA BDD (`qa-bdd`) - v0.2.0
 
-**What's Included:**
-- **2 Skills** (Production Ready) - Skill auditing and perfection workflows
+Quality assurance tools for pytest-bdd projects and Claude Code plugin skills.
+
+| Component | Count | Status |
+|-----------|-------|--------|
+| Skills | 4 | Production ready |
 
 **Skills:**
-- **Skill Perfection** (`/plugin-qa-skill-perfection`) - Audit and fix plugin skills in a single pass. Verifies skill content against official documentation, fixes issues immediately, and produces verification reports. Includes optional Python syntax preflight script.
-- **QA Audit** (`/plugin-qa-skill-qa-audit`) - Comprehensive QA verification of plugin skills. Verifies every line of instruction, code example, and claim against official documentation. Produces structured audit reports with severity ratings and quality metrics.
 
-**Use Cases:**
-- Validate skill correctness before publishing
-- Check for deprecated APIs and outdated documentation
-- Verify code examples are complete and executable
-- Ensure documentation links are current and accessible
-- Systematic quality review with detailed reporting
+| Skill | Purpose |
+|-------|---------|
+| `skill-qa-audit` | Read-only audit of plugin skills against official documentation |
+| `skill-perfection` | Audit and fix skills in a single pass with optional Python preflight |
+| `inspect-steps` | Context-aware BDD step assertion inspection |
+| `step-development` | BDD step development workflows with AST-based anti-pattern detection |
+
+---
+
+### Neograph Development (`neograph-dev`) - v0.1.0
+
+Development toolkit for the [neograph](https://neograph.pro) declarative LLM graph compiler.
+
+| Component | Count | Status |
+|-----------|-------|--------|
+| Skills | 5 | Production ready |
+
+**Skills:**
+
+| Skill | Purpose |
+|-------|---------|
+| `neograph-dev-codebase-nav` | Import map, layer discipline, deferred import budget, module ownership |
+| `neograph-dev-bug-fix` | TDD bug fix workflow with mutation verification and past bug catalog |
+| `neograph-dev-test-design` | Test file layout, fake infrastructure, three-surface parity, Hypothesis |
+| `neograph-dev-rendering` | Two prompt systems, rendering dispatch hierarchy, BAML parity invariant |
+| `neograph-dev-lint` | Lint architecture, extension guide, CLI wiring checklist, template resolver |
+
+---
 
 ## Team Auto-Install
 
@@ -96,7 +119,8 @@ Add to your project's `.claude/settings.json`:
   "enabledPlugins": {
     "langgraph-dev@agentic-toolkit": true,
     "dev-practices@agentic-toolkit": true,
-    "plugin-qa@agentic-toolkit": true
+    "qa-bdd@agentic-toolkit": true,
+    "neograph-dev@agentic-toolkit": true
   }
 }
 ```
