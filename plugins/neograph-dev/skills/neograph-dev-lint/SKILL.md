@@ -31,11 +31,27 @@ provided config dict. Existing since v0.1.
 Validates that `${var}` placeholders in inline prompts match predicted input
 dict keys. Added in neograph-0h3x.
 
+Inline prompts only see raw dict keys from `node.inputs` -- no flattened fields
+from `render_for_prompt` return types, and no framework extras like `node_id`,
+`project_root`, or `human_feedback`. The `_KNOWN_EXTRAS` set
+(`{"node_id", "project_root", "human_feedback"}`) is explicitly subtracted from
+valid keys for inline prompts (see `valid_keys = predicted_keys | (known_vars - _KNOWN_EXTRAS)`
+at lint.py:231). This is because inline `${var}` substitution skips the full
+rendering pipeline (`_render_with_flattening` never runs).
+
 ### 3. Template-Ref Placeholder Checks
 
 When a `template_resolver` is provided, reads template text for template-ref
 prompts, extracts `{placeholder}` names, and validates against input keys.
 Added in neograph-vkiw.
+
+Template-ref prompts see the full set of available keys: predicted input keys +
+flattened field names from `render_for_prompt` return annotations + all known
+vars (including framework extras like `node_id`/`project_root`/`human_feedback`).
+This is because the `prompt_compiler` receives the `RenderedInput.for_template_ref`
+dict which merges rendered inputs with flattened fields and framework extras.
+The valid key set is `predicted_keys | known_vars` (lint.py:236) -- no
+subtraction of `_KNOWN_EXTRAS`.
 
 ## The lint() API
 
@@ -49,6 +65,45 @@ issues = lint(
     template_resolver=my_resolver,            # Template text resolver (optional)
 )
 ```
+
+## `_predict_input_keys` and the include_flattened Parameter
+
+`_predict_input_keys(node, include_flattened=True)` (lint.py:286) computes what
+dict keys a node will see at runtime. For dict-form `node.inputs`, the base keys
+are the dict keys themselves.
+
+The `include_flattened` parameter controls whether flattened field names from
+`render_for_prompt` BaseModel return types are added to the key set:
+
+- **`include_flattened=False`** -- used for inline prompts. Inline `${var}`
+  substitution does not go through the rendering pipeline, so flattened fields
+  and framework extras are not available. Only raw input dict keys are valid.
+- **`include_flattened=True`** (default) -- used for template-ref prompts. Adds
+  flattened field names by calling `_get_flattened_field_names()` (lint.py:309)
+  for each input type. These names come from statically inspecting the
+  `render_for_prompt()` return type annotation on each input type.
+
+This parameter is the root of the inline/template-ref key asymmetry: inline
+prompts see a strict subset of the keys that template-ref prompts see.
+
+## `render_for_prompt` Return Annotation Introspection
+
+`_get_flattened_field_names(input_type)` (lint.py:309) statically analyzes the
+`render_for_prompt()` return type annotation to predict which flattened keys
+will be available at runtime.
+
+The algorithm:
+1. Look up `render_for_prompt` on `input_type` via `getattr`.
+2. Resolve the return annotation using `_resolve_return_type()`, which calls
+   `typing.get_type_hints()` with a frame-walking fallback for locally-defined
+   types (same technique as neograph's DI classifier).
+3. If the return type is a `BaseModel` subclass, extract non-excluded field
+   names from `model_fields`.
+4. Return the field names as a `set[str]`. If any step fails (no method, no
+   annotation, not a BaseModel), return an empty set.
+
+This lets lint warn about template placeholders that reference flattened fields
+without calling `render_for_prompt` at runtime -- purely static analysis.
 
 ### LintIssue
 
@@ -190,3 +245,9 @@ Before submitting lint changes:
 - **Checking template text without a resolver.** Template-ref prompts are
   opaque. Without a resolver, lint cannot read the template. Fail open (skip),
   not closed (false error).
+- **Assuming inline and template-ref prompts see the same keys.** Inline
+  `${var}` skips the rendering pipeline, so flattened fields from
+  `render_for_prompt` and framework extras (`node_id`, `project_root`,
+  `human_feedback`) are not available. Template-ref `{var}` goes through
+  full rendering and sees the complete key set. This asymmetry caused
+  neograph-b3ox.

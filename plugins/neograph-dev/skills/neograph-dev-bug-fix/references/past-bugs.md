@@ -58,3 +58,52 @@ to recognize recurring patterns.
 **Root cause**: 13 bare exception handlers across the codebase, added during rapid development.
 **Fix**: Replaced all with specific exception types or re-raise. Added structural guard.
 **Lesson**: `except Exception: pass` is never acceptable. Structural guard prevents regression.
+
+## Pattern 9: Lint/Runtime Divergence for Inline Flattened Fields (neograph-b3ox)
+
+**Symptom**: Lint passed for `${summary}` in inline prompt, but runtime crashed with unresolvable placeholder.
+**Root cause**: `_predict_input_keys` used `include_flattened=True` for both inline and template-ref prompts. Flattened fields from `render_for_prompt()` BaseModel returns are only available in template-ref prompts -- inline prompts skip `_render_with_flattening`.
+**Fix**: `_predict_input_keys(node, include_flattened=False)` for inline prompts; `include_flattened=True` (default) for template-ref.
+**Lesson**: Lint must mirror the exact key set each prompt type sees at runtime. Different prompt types = different valid keys.
+
+## Pattern 10: Known Extras Not Available in Inline Prompts (neograph-3r4f)
+
+**Symptom**: `${node_id}` in inline prompt resolved to empty string at runtime, but lint didn't warn.
+**Root cause**: `_KNOWN_EXTRAS` (node_id, project_root, human_feedback) were included in valid keys for inline prompts. But inline prompts resolve via `_resolve_var()` which only has the raw input dict -- no access to config/state where these live.
+**Fix**: Subtract `_KNOWN_EXTRAS` from valid keys for inline prompts: `valid_keys = predicted_keys | (known_vars - _KNOWN_EXTRAS)`.
+**Lesson**: Framework-injected keys are only available in the template-ref path where prompt_compiler receives them as kwargs.
+
+## Pattern 11: render_prompt Inspector Divergence (neograph-7io8)
+
+**Symptom**: `render_prompt(node, data)` produced different output than the actual LLM dispatch path.
+**Root cause**: `render_prompt` in `_llm.py` built its own `RenderedInput` but didn't use the same `_render_input()` dispatcher logic that the mode dispatch layer uses.
+**Fix**: `render_prompt` now calls `build_rendered_input()` from `renderers.py`, same function the dispatch layer uses.
+**Lesson**: Inspection tools must use the same code path as execution. Separate re-implementations drift.
+
+## Pattern 12: XmlRenderer No Escaping (neograph-4vtb)
+
+**Symptom**: Input data containing `<` or `&` characters produced malformed XML in prompts.
+**Root cause**: `XmlRenderer` concatenated string values directly into XML tags without escaping special characters.
+**Fix**: Applied `xml.sax.saxutils.escape()` to string values before tag insertion.
+**Lesson**: Any renderer that produces structured text must escape content characters that have special meaning in the format.
+
+## Pattern 13: list[BaseModel] Stringified Instead of BAML (neograph-6w6i)
+
+**Symptom**: A `list[Claim]` in a template-ref prompt rendered as `[Claim(text='...', ...)]` (Python repr) instead of BAML notation.
+**Root cause**: `_render_single()` only checked `isinstance(value, BaseModel)`, missing the `list[BaseModel]` case. Lists fell through to `str(value)`.
+**Fix**: Added `isinstance(value, list) and value and isinstance(value[0], BaseModel)` check before the primitive fallthrough, routing to `describe_value()`.
+**Lesson**: Collection types containing models need explicit rendering dispatch. Don't assume model detection covers collections.
+
+## Pattern 14: Overlapping Flattened Fields Silent Loss (neograph-j3hw)
+
+**Symptom**: Two upstream nodes both had `render_for_prompt()` returning BaseModels with a `summary` field. One silently overwrote the other in `RenderedInput.flattened`.
+**Root cause**: `build_rendered_input()` merged flattened fields from all inputs into one dict. Same-named fields from different upstreams collided.
+**Fix**: Flattened fields from later inputs overwrite earlier ones (last-write-wins), with a debug log warning when collision occurs.
+**Lesson**: Flattened field names share a flat namespace. Field name collisions are possible and should at minimum be logged. Consider namespace-prefixing if this becomes common.
+
+## Pattern 15: render_for_prompt list Return Raw Passthrough (neograph-jmms)
+
+**Symptom**: `render_for_prompt()` returning a `list[BaseModel]` was passed through without any rendering -- downstream got raw Python objects in the template.
+**Root cause**: `_render_with_flattening()` only checked `isinstance(result, BaseModel)` for the return value. A `list[BaseModel]` return skipped both the BaseModel branch and the string branch, falling to the catch-all which returned empty flattened dict.
+**Fix**: Added explicit `isinstance(result, list) and result and isinstance(result[0], BaseModel)` branch in `_render_with_flattening()` that renders via `describe_value()`.
+**Lesson**: `render_for_prompt()` can return str, BaseModel, or list[BaseModel]. Each return type needs its own rendering path.

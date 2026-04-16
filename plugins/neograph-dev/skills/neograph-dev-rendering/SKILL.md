@@ -60,6 +60,37 @@ For each Pydantic value flowing into a prompt:
    is configured. Symmetric with tool-result rendering.
 4. **Primitives** pass through unchanged (str, int, etc.)
 
+### RenderedInput dataclass
+`renderers.py:32`. The single object that bundles all rendering artifacts:
+- `raw` -- original Pydantic models for inline `${var}` dotted access
+- `rendered` -- BAML strings for template-ref prompts
+- `flattened` -- extra fields from `render_for_prompt()` BaseModel returns (template-ref only)
+- `available_keys_inline` -- keys valid for inline prompts (raw dict keys only)
+- `available_keys_template` -- keys valid for template-ref prompts (raw + flattened + extras)
+- `for_template_ref` property -- merges `rendered` + `flattened`
+
+Produced by `build_rendered_input(input_data, renderer=None)`.
+
+### Field flattening (render_for_prompt BaseModel returns)
+When `render_for_prompt()` returns a BaseModel, `_render_with_flattening()` (renderers.py:320) iterates each field:
+- BaseModel children and list[BaseModel] children are **preserved as objects** (not string-rendered) for dotted template access
+- Other values are rendered via `_render_single`
+- The whole returned model is also rendered as a single string
+
+These fields become individually addressable template vars in template-ref prompts (via `RenderedInput.flattened`).
+
+Lint-time: `_get_flattened_field_names()` in lint.py:309 predicts flattened keys from return type annotations without calling the method.
+
+### list[BaseModel] handling
+In `_render_single()` (renderers.py:384-386): non-empty `list[BaseModel]` gets BAML-rendered via `describe_value()`, same as single models.
+In `_render_with_flattening()` (renderers.py:342-343): `list[BaseModel]` children are preserved as objects in flattened dict for indexed template access.
+
+### ExcludeFromOutput marker
+`describe_type.py:18`. Annotated marker for Pydantic fields. Fields with this marker:
+- Visible in input rendering (describe_value, XmlRenderer, etc.)
+- Excluded from describe_type() output schema (LLM won't produce them)
+- Must have a default value
+
 ### Where rendering happens
 
 | Prompt type | Rendering location | Input to next stage |
@@ -106,6 +137,9 @@ Before modifying rendering code:
 - [ ] `Field(exclude=True)` honored in BAML output
 - [ ] `ExcludeFromOutput` marker honored in BAML schema but visible in input rendering
 - [ ] Tests through full dispatch chain (not just `render_input` directly)
+- [ ] RenderedInput fields correctly populated for both prompt types
+- [ ] Field flattening preserves BaseModel children as objects
+- [ ] list[BaseModel] rendered via describe_value, not str()
 
 ## Anti-Patterns
 
@@ -118,6 +152,11 @@ Before modifying rendering code:
 - **Testing render_input directly without testing through _dispatch.** The
   dispatch layer adds the inline-vs-template-ref split. Unit tests on
   `render_input` miss this.
+- **Stringifying list[BaseModel] instead of using describe_value.** Lists of
+  models should produce BAML notation, not Python repr.
+- **Accessing flattened fields in inline prompts.** Flattened fields from
+  render_for_prompt BaseModel returns are NOT available in inline `${var}`
+  prompts -- only in template-ref `{var}` prompts.
 
 ## Additional Resources
 

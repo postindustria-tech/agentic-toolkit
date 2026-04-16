@@ -104,4 +104,36 @@ Example: model with `render_for_prompt()` returning a projected BaseModel.
 3. Output: "Tool result:\n{\n  items: [\n    \"a\"\n  ]\n}"
 ```
 
-The BAML body is identical to the input rendering path — only the prefix differs.
+The BAML body is identical to the input rendering path -- only the prefix differs.
+
+## RenderedInput Construction Flow
+
+Example: `Node("proc", prompt="rw/summarize", inputs={"seed": Claims})` where Claims has `render_for_prompt()` returning a BaseModel.
+
+```
+1. _dispatch._render_input(node, input_data)
+   -> NOT inline, proceed to render
+   -> build_rendered_input(input_data, renderer=effective_renderer)
+
+2. build_rendered_input({"seed": Claims(...)}, renderer=None)
+   -> for each key-value:
+   -> _render_with_flattening("seed", Claims(...), None)
+
+3. _render_with_flattening("seed", Claims(...), None)
+   -> Claims has render_for_prompt()
+   -> result = Claims.render_for_prompt() -> Presentation(summary="...", score=0.95)
+   -> isinstance(result, BaseModel) -> True
+   -> whole = describe_value(Presentation(...))
+   -> iterate fields:
+      - summary: str -> _render_single("...") -> "..."
+      - score: float -> _render_single(0.95) -> 0.95
+   -> return (whole_rendered, {"summary": "...", "score": 0.95})
+
+4. RenderedInput(
+     raw={"seed": Claims(...)},           # for inline ${seed.text}
+     rendered={"seed": "<BAML string>"},   # for template-ref {seed}
+     flattened={"summary": "...", "score": 0.95},  # for template-ref {summary}
+     available_keys_inline={"seed"},
+     available_keys_template={"seed", "summary", "score"},
+   )
+```
