@@ -108,6 +108,30 @@ raw data unchanged. `_compile_prompt()` calls `_substitute_vars()` which does
 raw attribute access. At the leaf, `_resolve_var` calls `describe_value()` on
 BaseModel values instead of `str()`.
 
+### Oracle merge_prompt rendering (neograph-26eg)
+
+`make_oracle_merge_fn` in `_oracle.py` now builds input_data as a dict:
+```python
+input_data = {"variants": primary}
+if node_inputs:
+    for key in node_inputs:
+        val = getattr(state, field_name_for(key), None)
+        if val is not None:
+            input_data[key] = val
+```
+
+The merge prompt template sees:
+- `${variants}` -- BAML-rendered list of all N generator outputs
+- `${upstream_key}` -- upstream node output (raw for inline, rendered for template-ref)
+- `${upstream_key.field}` -- dotted access on upstream values
+
+Three call sites thread `node_inputs`:
+- `compiler.py:440` (Node + Oracle): passes `node.inputs`
+- `compiler.py:351` (Construct + Oracle): passes `None` (no parent inputs)
+- `_wiring.py:251` (Each x Oracle): passes `node.inputs`
+
+The `@merge_fn` path is unchanged -- still receives raw variant list.
+
 ## The Parity Invariant
 
 Tool-result rendering and prompt-input rendering produce identical BAML for the

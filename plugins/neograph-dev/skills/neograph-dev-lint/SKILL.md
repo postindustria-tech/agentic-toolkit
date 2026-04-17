@@ -127,6 +127,26 @@ class LintIssue:
 | `from_config_model` | varies | Bundled model field not in config |
 | `template_placeholder_unresolvable` | ERROR | Placeholder not in input keys or known extras |
 | `template_placeholder_known_vars_only` | WARN | Placeholder only resolvable via known_vars (bridge alias risk) |
+| `loop_condition_unregistered` | ERROR | Loop when= string not in condition registry |
+| `loop_condition_none_unsafe` | WARN/ERROR | Loop when= crashes on None (first iteration) |
+
+### Loop Condition Checks (neograph-sfj8)
+
+lint() now validates Loop modifier when-conditions. Three checks in `_check_loop_condition()`:
+
+1. **String condition not registered** (kind: `loop_condition_unregistered`, ERROR):
+   If `Loop.when` is a string, checks `registry.condition.get(name)`. Reports if missing.
+
+2. **Callable condition not None-safe** (kind: `loop_condition_none_unsafe`, WARN):
+   Smoke-tests `when(None)` -- catches `lambda d: d.score < 0.8` without `d is None or` guard.
+   WARN because the callable might handle None via other means.
+
+3. **Registered string condition None-unsafe** (kind: `loop_condition_none_unsafe`, ERROR):
+   If a registered string condition (e.g., from `parse_condition`) crashes on None, report as ERROR.
+   `parse_condition` results always crash on None because `getattr(None, field)` raises.
+
+Implementation: `_check_loop_condition` in lint.py, wired into `_walk()` for both Nodes and Constructs.
+Uses deferred import `from neograph._registry import registry` (bumped import budget to 42).
 
 ## How to Add a New Lint Check
 
@@ -234,6 +254,9 @@ Before submitting lint changes:
 - [ ] New check has integration tests (not just unit tests)
 - [ ] CLI wiring checklist complete (all Namespace calls updated)
 - [ ] Monkeypatched lint lambda updated
+- [ ] Loop condition checks fire on both Node and Construct modifiers
+- [ ] Registered string conditions are smoke-tested for None-safety
+- [ ] Existing loop tests (which use proper None-safe conditions) produce no lint issues
 - [ ] `uv run pytest tests/test_validation.py tests/test_cli.py -v` passes
 
 ## Anti-Patterns
