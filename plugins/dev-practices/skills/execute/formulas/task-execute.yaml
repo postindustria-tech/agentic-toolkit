@@ -118,6 +118,106 @@ iterate:
       depends_on: ["baseline"]
       labels: ["atom:research"]
 
+    # -- Atom 1b: Codebase-wide disease scan -----------------------------------
+    - id: "codebase-scan-{TASK_ID}"
+      title: "Codebase-wide disease scan for {TASK_ID}"
+      description: |
+        Architectural changes are local-only by default. This atom forces the
+        executor to look at the WHOLE codebase before designing the fix, so the
+        design phase addresses every instance of the disease pattern — not just
+        the motivating site.
+
+        Background: a Jun-2026 multi-agent code review surfaced 41 verified
+        findings (1 Critical, 10 High, 9 Medium) — overwhelmingly cases where a
+        canonical helper existed but the majority of call sites bypassed it,
+        because previous tickets fixed the motivating site only. This atom is
+        the structural counter-measure.
+
+        ## Precondition
+
+        `bd show {TASK_ID}` shows the `research:complete` label.
+
+        ## Instructions
+
+        1. **Identify the disease pattern** from the design field. Write it
+           as a one-line spec: "What anti-pattern is this ticket eliminating?"
+           Examples:
+             - "raw getattr(state, X) on state instead of bus.get/get_required"
+             - "f-string per-key field-name joins instead of output_field_name(...)"
+             - "next(iter(x.values())) on outputs instead of normalize_outputs(x).primary"
+             - "module-level mutable dict in src/<pkg>/"
+             - "two-named alias for the same helper (e.g. _isinstance_safe / _is_instance_safe)"
+
+        2. **Scan the WHOLE codebase** for this pattern. Use grep / AST search
+           across the entire source tree (NOT just the cited files in the
+           ticket). Concrete techniques:
+             - Pattern grep: `grep -rn '<regex>' src/<pkg>/`
+             - AST scan: `python -c "import ast; ..."` for syntactic patterns
+             - Type-check: `mypy --strict` if relevant
+             - Dual-name search: `git grep -E '_(is)?_?instance_safe'`
+
+        3. **Produce a disposition table** in the bead notes. Every instance
+           found must appear:
+
+           ```
+           ## Codebase Disease Scan ({TASK_ID})
+
+           Pattern: <one-line spec>
+           Scan command: <exact command, reproducible>
+           Total instances found: <N>
+
+           | # | File:line | Form | Disposition | Reason |
+           |---|-----------|------|-------------|--------|
+           | 1 | foo.py:42 | f"{x}_{key}" | MIGRATE | use output_field_name |
+           | 2 | bar.py:101 | f"{x}_{key}" | ALLOWLIST | not a field-name join — base path concat |
+           | 3 | baz.py:55 | f"{x}_{key}" | DEFER | scope explosion — file new ticket neograph-XXXX |
+           ```
+
+           Allowed dispositions:
+           - **MIGRATE**: this ticket fixes the instance
+           - **ALLOWLIST**: the instance is a false positive (the pattern matches but the semantic is different); the reason must be specific enough to justify
+           - **DEFER**: out of scope for this ticket; a NAMED follow-up beads ticket is filed BEFORE this atom closes
+
+           No row may be silently ignored. Every instance gets a disposition.
+
+        4. **Store the scan in the bead**:
+
+           ```bash
+           bd update {TASK_ID} --append-notes "<disposition table above>"
+           ```
+
+        5. **Update the design field** if the disposition table reveals scope
+           changes (e.g. you initially planned to fix 1 site, the scan found 8):
+
+           ```bash
+           bd update {TASK_ID} --design "<updated design covering all MIGRATE instances>"
+           ```
+
+        ## Gate: Add Label
+
+        ONLY after the disposition table is complete (every row has MIGRATE /
+        ALLOWLIST / DEFER + a reason) AND every DEFER row has a filed
+        follow-up ticket ID:
+
+        ```bash
+        bd label add {TASK_ID} codebase-scan:complete
+        ```
+
+        ## Anti-Patterns
+
+        - "Disease pattern unclear, scope unbounded" → STOP. The pattern must
+          be one-line specifiable. If you can't write the spec, the ticket
+          itself is too vague.
+        - "Found instances but ignored some" → every row gets a disposition.
+        - "DEFER without filing the follow-up ticket" → defer requires a
+          beads ticket ID to point at.
+        - Skipping this atom because "the cited files are obvious" → the
+          point of this atom is what's NOT in the cited files.
+
+      acceptance: "codebase-scan:complete label added. Disposition table in notes covers every found instance. Every DEFER row points to a filed follow-up ticket."
+      depends_on: ["research-{TASK_ID}"]
+      labels: ["atom:codebase-scan", "atom:gate"]
+
     # -- Atom 2: Architect Review ----------------------------------------------
     - id: "review-{TASK_ID}"
       title: "Architect review of {TASK_ID}"
@@ -126,7 +226,13 @@ iterate:
 
         ## Precondition
 
-        Run `bd show {TASK_ID}` and verify research:complete label is present.
+        Run `bd show {TASK_ID}` and verify BOTH labels are present:
+        - `research:complete`
+        - `codebase-scan:complete`
+
+        The architect review now evaluates the design against the FULL
+        codebase scope discovered in the codebase-scan atom — not just the
+        cited files.
 
         ## Review Criteria
 
@@ -153,7 +259,7 @@ iterate:
         ```
 
       acceptance: "Review written to task notes with rated findings and overall verdict."
-      depends_on: ["research-{TASK_ID}"]
+      depends_on: ["codebase-scan-{TASK_ID}"]
       labels: ["atom:review", "atom:gate"]
 
     # -- Atom 3: Triage --------------------------------------------------------
@@ -253,11 +359,111 @@ iterate:
       depends_on: ["write-test-{TASK_ID}"]
       labels: ["atom:implement"]
 
+    # -- Atom 5b: Sweep verification gate --------------------------------------
+    - id: "sweep-verify-{TASK_ID}"
+      title: "Sweep verification for {TASK_ID}"
+      description: |
+        Confirm the codebase-scan disposition table is honored end-to-end and
+        a structural guard pins the disease pattern going forward.
+
+        Without this atom, a future PR could re-introduce the same pattern in
+        a new file and slip the existing guards (which are typically scoped to
+        cited files). This atom converts the local fix into a class-level fix.
+
+        ## Precondition
+
+        - `codebase-scan:complete` label on {TASK_ID}
+        - Implementation atom closed
+
+        ## Instructions
+
+        1. **Re-run the scan** from the codebase-scan atom. Use the EXACT same
+           command recorded in bead notes.
+
+        2. **Compute the diff** between the Phase 1b table and current state:
+
+           ```
+           ## Sweep Verification ({TASK_ID})
+
+           Re-scan command: <same as Phase 1b>
+           Pre-fix instances: <N from Phase 1b>
+           Post-fix instances: <M>
+
+           | # | Phase 1b file:line | Phase 1b disposition | Post-fix state | Verified |
+           |---|--------------------|--------------------|----|----|
+           | 1 | foo.py:42 | MIGRATE | now uses helper | YES |
+           | 2 | bar.py:101 | ALLOWLIST | unchanged | YES (false positive confirmed) |
+           | 3 | baz.py:55 | DEFER -> neograph-XXXX | unchanged | YES (deferred ticket open) |
+           ```
+
+           Every Phase 1b row must have:
+           - MIGRATE rows: the post-fix state shows the helper is now used
+           - ALLOWLIST rows: the instance is still there but the false-positive
+             reason still holds (re-state it)
+           - DEFER rows: the follow-up ticket exists, is open, and tracks the
+             remaining instance
+
+        3. **Verify the structural guard exists**. This atom REQUIRES that the
+           implementation atom added a structural guard banning future
+           instances of the disease pattern (modulo the allowlist). The guard
+           must:
+             - Live in `tests/test_guards_*.py` (or equivalent)
+             - Have at least one positive and one negative meta-test
+             - If regex-based, include a "would-be-missed" case as a meta-test
+               (cf. the `_neo_isolated_input` slip of `^neo_` regex — see
+               docs/design/code-review-synthesis-2026-06-02.md MED-06)
+
+           Record the guard reference:
+
+           ```bash
+           bd update {TASK_ID} --append-notes "## Structural Guard
+           - File: tests/test_guards_<name>.py
+           - Class: TestNo<DiseasePattern>
+           - Meta-tests: positive=<test_name>, negative=<test_name>, regex-slip=<test_name>"
+           ```
+
+        4. **New instances detected** (the sweep found instances NOT in Phase 1b):
+           - If the disposition table was incomplete, STOP. Re-do the scan
+             properly. The Phase 1b artifact is the contract.
+           - If the new instances were introduced BY this ticket (e.g. you
+             refactored and accidentally re-introduced the pattern), FAIL.
+             Re-implement.
+
+        ## Gate: Add Label
+
+        ONLY after the post-fix table is complete AND the structural guard
+        exists:
+
+        ```bash
+        bd label add {TASK_ID} sweep:complete
+        ```
+
+        ## Anti-Patterns
+
+        - "All Phase 1b rows had ALLOWLIST disposition" → suspicious. The
+          ticket may not be doing real work. Re-examine.
+        - "Structural guard added but no negative meta-test" → the guard
+          itself is a regex-slip risk. Add the meta-test.
+        - "Found new instances during sweep, dispositioned silently" → fail.
+          Either the Phase 1b scan was incomplete (re-do it) or implementation
+          regressed.
+
+      acceptance: "sweep:complete label added. Post-fix disposition table written. Structural guard exists with positive+negative+regex-slip meta-tests."
+      depends_on: ["implement-{TASK_ID}"]
+      labels: ["atom:sweep-verify", "atom:gate"]
+
     # -- Atom 6: Commit --------------------------------------------------------
     - id: "commit-{TASK_ID}"
       title: "Commit implementation for {TASK_ID}"
       description: |
         Commit the implementation for {TASK_ID}.
+
+        ## Precondition
+
+        BOTH labels present on {TASK_ID}:
+        - `research:complete`
+        - `codebase-scan:complete`
+        - `sweep:complete`
 
         ## Instructions
 
@@ -267,7 +473,7 @@ iterate:
         4. Verify: `git log -1 --oneline`
 
       acceptance: "Git commit exists for {TASK_ID} implementation."
-      depends_on: ["implement-{TASK_ID}"]
+      depends_on: ["sweep-verify-{TASK_ID}"]
       labels: ["atom:commit"]
 
 # -- Finalize (after all tasks) ------------------------------------------------

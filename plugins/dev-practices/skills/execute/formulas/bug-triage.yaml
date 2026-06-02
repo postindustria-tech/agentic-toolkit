@@ -100,9 +100,75 @@ iterate:
         3. Search for the same pattern across the codebase
         4. Document findings, file separate beads tasks if needed
 
+        Note: this atom finds OTHER instances of the same BUG. Atom 2b
+        (codebase-scan) is the stricter follow-up for the DISEASE PATTERN
+        the fix introduces — they serve different purposes.
+
       acceptance: "Similar pattern analysis written to task notes."
       depends_on: ["reproduce-{BUG_ID}"]
       labels: ["atom:trace-similar"]
+
+    # -- Atom 2b: Codebase-wide disease scan -----------------------------------
+    - id: "codebase-scan-{BUG_ID}"
+      title: "Codebase-wide disease scan for {BUG_ID}"
+      description: |
+        The fix for {BUG_ID} typically eliminates an anti-pattern (raw access
+        where a helper exists, parallel implementation of a rule, etc.). This
+        atom forces a WHOLE-CODEBASE scan for that anti-pattern BEFORE the
+        fix is designed, so the fix addresses every instance — not just the
+        motivating site.
+
+        Distinct from trace-similar: that atom finds OTHER bugs of the same
+        shape. This atom finds INSTANCES of the disease pattern that the fix
+        introduces (or codifies) a helper for.
+
+        ## Precondition
+
+        `bd show {BUG_ID}` shows the `reproduce:complete` label.
+
+        ## Instructions
+
+        1. **Identify the disease pattern** from the design's Fix Approach.
+           Write a one-line spec — see task-execute.yaml::codebase-scan for
+           examples.
+
+        2. **Scan the WHOLE codebase**. Use grep / AST search across the
+           full source tree. NOT just the file where the bug manifests.
+
+        3. **Produce a disposition table** in the bead notes:
+
+           ```
+           ## Codebase Disease Scan ({BUG_ID})
+
+           Pattern: <one-line spec>
+           Scan command: <exact command, reproducible>
+           Total instances found: <N>
+
+           | # | File:line | Form | Disposition | Reason |
+           |---|-----------|------|-------------|--------|
+           | 1 | foo.py:42 | <form> | MIGRATE | <reason> |
+           | 2 | bar.py:101 | <form> | ALLOWLIST | <reason> |
+           | 3 | baz.py:55 | <form> | DEFER | <ticket-id> |
+           ```
+
+           Every instance gets a disposition (MIGRATE / ALLOWLIST / DEFER).
+           DEFER requires a filed follow-up ticket ID.
+
+        4. **Store the scan**:
+
+           ```bash
+           bd update {BUG_ID} --append-notes "<disposition table>"
+           ```
+
+        ## Gate: Add Label
+
+        ```bash
+        bd label add {BUG_ID} codebase-scan:complete
+        ```
+
+      acceptance: "codebase-scan:complete label added. Disposition table covers every found instance. Every DEFER points to a filed follow-up ticket."
+      depends_on: ["trace-similar-{BUG_ID}"]
+      labels: ["atom:codebase-scan", "atom:gate"]
 
     # -- Atom 3: Architect Review ----------------------------------------------
     - id: "review-{BUG_ID}"
@@ -122,7 +188,7 @@ iterate:
         Rate findings: LOW / MEDIUM / HIGH.
 
       acceptance: "Review written with rated findings and overall verdict."
-      depends_on: ["trace-similar-{BUG_ID}"]
+      depends_on: ["codebase-scan-{BUG_ID}"]
       labels: ["atom:review", "atom:gate"]
 
     # -- Atom 4: Triage --------------------------------------------------------
@@ -168,6 +234,61 @@ iterate:
       depends_on_prev_barrier: true
       labels: ["atom:fix"]
 
+    # -- Atom 5b: Sweep verification gate --------------------------------------
+    - id: "sweep-verify-{BUG_ID}"
+      title: "Sweep verification for {BUG_ID}"
+      description: |
+        Confirm the codebase-scan disposition table is honored AND a
+        structural guard pins the disease pattern going forward.
+
+        ## Precondition
+
+        - `codebase-scan:complete` label on {BUG_ID}
+        - fix atom closed
+
+        ## Instructions
+
+        1. **Re-run the scan** using the EXACT same command from the
+           codebase-scan atom.
+
+        2. **Compute the diff** — every Phase 1b row must have a verified
+           post-fix disposition (MIGRATE done / ALLOWLIST holds / DEFER
+           ticket open):
+
+           ```
+           ## Sweep Verification ({BUG_ID})
+
+           Re-scan command: <same as Phase 1b>
+           Pre-fix instances: <N>
+           Post-fix instances: <M>
+
+           | # | Phase 1b file:line | Phase 1b disposition | Post-fix state | Verified |
+           ```
+
+        3. **Verify the structural guard exists** banning future instances
+           of the disease pattern. The guard MUST:
+             - Live in `tests/test_guards_*.py`
+             - Include positive AND negative meta-tests
+             - If regex-based, include a "would-be-missed" case as a meta-test
+               (e.g. `_neo_isolated_input` slipping `^neo_` regex — MED-06)
+
+           Record:
+
+           ```bash
+           bd update {BUG_ID} --append-notes "## Structural Guard
+           - File / Class / Meta-tests: ..."
+           ```
+
+        ## Gate: Add Label
+
+        ```bash
+        bd label add {BUG_ID} sweep:complete
+        ```
+
+      acceptance: "sweep:complete label added. Post-fix disposition table written. Structural guard exists with positive+negative+regex-slip meta-tests."
+      depends_on: ["fix-{BUG_ID}"]
+      labels: ["atom:sweep-verify", "atom:gate"]
+
     # -- Atom 6: E2E Verify (Optional) ----------------------------------------
     - id: "e2e-verify-{BUG_ID}"
       title: "E2E verify fix for {BUG_ID}"
@@ -178,7 +299,7 @@ iterate:
         Execute if bug touches external APIs, serialization, or protocol behavior.
 
       acceptance: "E2E verification completed, skipped with justification, or manual steps documented."
-      depends_on: ["fix-{BUG_ID}"]
+      depends_on: ["sweep-verify-{BUG_ID}"]
       labels: ["atom:e2e-verify"]
 
     # -- Atom 7: Commit --------------------------------------------------------
@@ -186,6 +307,13 @@ iterate:
       title: "Commit fix for {BUG_ID}"
       description: |
         Commit the bug fix.
+
+        ## Precondition
+
+        All labels present on {BUG_ID}:
+        - `reproduce:complete`
+        - `codebase-scan:complete`
+        - `sweep:complete`
 
         1. Review changes
         2. Stage specific files
