@@ -214,7 +214,7 @@ iterate:
         - Skipping this atom because "the cited files are obvious" → the
           point of this atom is what's NOT in the cited files.
 
-      acceptance: "codebase-scan:complete label added. Disposition table in notes covers every found instance. Every DEFER row points to a filed follow-up ticket."
+      acceptance: "codebase-scan:complete label added (the closure criterion — do NOT close this atom without it). Disposition table in notes covers every found instance AND records the exact reproducible scan command. Every DEFER row points to a filed follow-up ticket."
       depends_on: ["research-{TASK_ID}"]
       labels: ["atom:codebase-scan", "atom:gate"]
 
@@ -226,9 +226,14 @@ iterate:
 
         ## Precondition
 
-        Run `bd show {TASK_ID}` and verify BOTH labels are present:
-        - `research:complete`
-        - `codebase-scan:complete`
+        Both gate labels must be present — the labels ARE the gate, not just
+        the depends_on edge (closing the upstream atom without its label is a
+        bypass; this hard-check catches it):
+        ```bash
+        for L in research:complete codebase-scan:complete; do
+          bd show {TASK_ID} | grep -q "$L" || { echo "GATE FAIL: missing $L"; exit 1; }
+        done
+        ```
 
         The architect review now evaluates the design against the FULL
         codebase scope discovered in the codebase-scan atom — not just the
@@ -273,7 +278,15 @@ iterate:
         Note "Clean review -- proceeding to implement." Close this atom.
 
         ### If NEEDS_REFINEMENT:
-        Create a refine atom addressing MEDIUM findings.
+        Inject a refine atom for the MEDIUM findings and re-point write-test
+        at it (it adjusts approach using EXISTING research — it does NOT
+        re-research):
+        ```bash
+        bd create --parent {EPIC_ID} --type task \
+          --title "Refine {TASK_ID} per review" \
+          --description "<MEDIUM findings to resolve>"      # -> REFINE_ID
+        bd dep add write-test-{TASK_ID} <REFINE_ID>          # write-test waits on refine
+        ```
 
         ### If NEEDS_USER_INPUT:
         Block for human direction. Leave this atom OPEN.
@@ -418,6 +431,12 @@ iterate:
            - DEFER rows: the follow-up ticket exists, is open, and tracks the
              remaining instance
 
+           NOTE: a MIGRATE fix shifts line numbers, so do NOT join Phase 1b and
+           post-fix rows on `file:line`. Re-localize each row by its matched
+           CONTENT (the `Form` column / matched text) and record the new
+           location. The deterministic check is the instance-count diff
+           (Pre-fix N vs Post-fix M); the per-row join is by content.
+
         3. **Verify the structural guard exists**. When the disposition table
            has >=1 MIGRATE row, this atom REQUIRES that the implementation (or
            write-test) atom added a structural guard banning future instances
@@ -428,9 +447,12 @@ iterate:
            The guard must:
              - Live in `tests/test_guards_*.py` (or equivalent)
              - Have at least one positive and one negative meta-test
-             - If regex-based, include a "would-be-missed" case as a meta-test
-               (cf. the `_neo_isolated_input` slip of `^neo_` regex — see
-               docs/design/code-review-synthesis-2026-06-02.md MED-06)
+             - If regex-based, include a "would-be-missed" case as a meta-test.
+               Concrete failure mode: a `_neo_isolated_input` key slips a
+               `^neo_`-anchored regex because of the leading underscore — the
+               meta-test feeds that variant and asserts the guard still catches
+               it. (A non-regex guard — AST-walk, import-graph — has no
+               regex-slip case; positive + negative suffice.)
 
            Record the guard reference:
 
@@ -467,7 +489,7 @@ iterate:
           Either the Phase 1b scan was incomplete (re-do it) or implementation
           regressed.
 
-      acceptance: "sweep:complete label added. Post-fix disposition table written. Structural guard exists with positive+negative+regex-slip meta-tests."
+      acceptance: "sweep:complete label added (the closure criterion — do NOT close this atom without it). Post-fix disposition table written. When >=1 MIGRATE row exists, a structural guard exists with positive + negative meta-tests (plus a regex-slip meta-test when the guard is regex-based); a zero-MIGRATE table records why the guard is N/A."
       depends_on: ["implement-{TASK_ID}"]
       labels: ["atom:sweep-verify", "atom:gate"]
 
@@ -479,10 +501,12 @@ iterate:
 
         ## Precondition
 
-        BOTH labels present on {TASK_ID}:
-        - `research:complete`
-        - `codebase-scan:complete`
-        - `sweep:complete`
+        ALL THREE gate labels must be present (hard-check):
+        ```bash
+        for L in research:complete codebase-scan:complete sweep:complete; do
+          bd show {TASK_ID} | grep -q "$L" || { echo "GATE FAIL: missing $L"; exit 1; }
+        done
+        ```
 
         ## Instructions
 
