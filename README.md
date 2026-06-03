@@ -37,7 +37,7 @@ Tutorial-grounded patterns and best practices for LangGraph development.
 
 ---
 
-### Development Practices (`dev-practices`) - v0.2.0
+### Development Practices (`dev-practices`) - v0.2.1
 
 Quality-driven development workflows with beads task management integration.
 

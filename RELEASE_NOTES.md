@@ -1,5 +1,24 @@
 # Release Notes
 
+## dev-practices v0.2.1 - In-loop targeted codebase scan (2026-06-03)
+
+### Added
+- **`code-review --targeted "<disease-spec>" [ticket-id]`** — a fast, single-disease
+  multi-agent scan mode of the `code-review` skill, distinct from the periodic full
+  audit. Fans out 3 disease-scoped lenses + an optional opus elegance reviewer,
+  writes to `.claude/code-review/<ticket-id>/`, and synthesizes a one-page
+  disposition table (`<5 min`).
+- **`review-disease-scan` agent** — purpose-built, lens-parameterized
+  (dedup / consistency / layering), whole-tree (not diff-anchored), disposition-table
+  output (not a severity catalog).
+
+### Changed
+- `task-execute.yaml` / `bug-triage.yaml` `codebase-scan` atoms now prescribe the
+  targeted scan for semantic diseases (a single grep stays sufficient for purely
+  syntactic patterns), and the `codebase-scan:complete` gate now requires the
+  `.claude/code-review/<ticket-id>/` artifact to exist — making the in-loop scan
+  structurally un-skippable. `sweep-verify` re-invokes the same mode.
+
 ## v0.3.1 - LangGraph Import Path Updates (2026-01-25)
 
 ### 🔧 LangGraph Documentation Compliance

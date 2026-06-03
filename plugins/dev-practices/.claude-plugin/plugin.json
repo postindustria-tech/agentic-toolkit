@@ -1,6 +1,6 @@
 {
   "name": "dev-practices",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Development practices and workflows for quality-driven software engineering. Provides TDD, session completion, molecular task execution with formula-based atom graphs, multi-agent code review, entity test remediation, obligation-driven test derivation, test source-of-truth auditing, and obligation reclassification. Integrates with beads task management for complete development lifecycle. Includes 5 specialized review agents for architecture, testing, DRY, consistency, layering, and Python practices.",
   "author": {
     "name": "Konst",
