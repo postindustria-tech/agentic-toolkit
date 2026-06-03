@@ -1,18 +1,25 @@
 name: task-fix
 description: >
-  Formula for fixing well-defined code issues with a SEPARATE verify gate.
-  Four atoms per task: prep -> implement -> verify -> commit. The verify atom
-  runs guards independently from implementation -- the agent cannot close it
-  without proving the specific fix landed.
+  Formula for fixing well-defined code issues with a SEPARATE verify gate AND
+  the codebase-wide sweep discipline. Six atoms per task:
+  prep -> codebase-scan -> implement -> verify -> sweep-verify -> commit.
+  The codebase-scan atom forces a whole-codebase look BEFORE the fix so it
+  addresses every instance of the disease pattern (not just the motivating
+  site); sweep-verify confirms the fix held and pins it with a structural
+  guard. The verify atom runs guards independently from implementation.
 
-  Total atoms: 1 (baseline) + 4N (per task) + 1 (verify-final) = 4N + 2.
-  Compare task-single at 3N + 2, task-execute at 7N + 2.
+  Total atoms: 1 (baseline) + 6N (per task) + 1 (verify-final) = 6N + 2.
+  Compare task-single at 3N + 2, task-execute at 8N + 2.
 
   Use when:
   - Each task has a precise description of what's wrong and what "fixed" means
   - Existing guards provide mechanical verification
   - No research or architect review needed
   - The fix is code-level (assertion logic, conditional guards, etc.)
+
+  Do NOT use task-single for a fix that is one instance of a repeated pattern —
+  task-single has no sweep gate and will fix only the motivating site. Route
+  pattern fixes here (task-fix) or to task-execute.
 
 variables:
   TASK_IDS:
@@ -82,26 +89,106 @@ iterate:
       depends_on: ["baseline"]
       labels: ["atom:prep"]
 
+    # -- Atom 1b: Codebase-wide disease scan -----------------------------------
+    - id: "codebase-scan-{TASK_ID}"
+      title: "Codebase-wide disease scan for {TASK_ID}"
+      description: |
+        A code-level fix is often one instance of a repeated pattern. This atom
+        forces a WHOLE-CODEBASE scan for that pattern BEFORE the fix lands, so
+        the fix addresses every instance — not just the motivating site (the
+        recurring failure mode the ARCH-SWEEP discipline exists to stop).
+
+        ## Precondition
+
+        `bd show {TASK_ID}` shows the prep plan in notes.
+
+        ## Instructions
+
+        1. **Identify the disease pattern** from the task + prep plan. Write it
+           as a one-line spec: "What anti-pattern is this fix eliminating?"
+           If the fix is a genuine ONE-OFF (no repeatable pattern), say so
+           explicitly — a one-off still gets a 1-row table.
+
+        2. **Scan the WHOLE codebase** for the pattern. Use grep / AST search
+           across the entire source tree, NOT just the cited file:
+             - Pattern grep: `grep -rn '<regex>' src/<pkg>/`
+             - AST scan for syntactic patterns
+             - Dual-name / variant search where relevant
+
+        3. **Produce a disposition table** in the bead notes. Every instance
+           found must appear:
+
+           ```
+           ## Codebase Disease Scan ({TASK_ID})
+
+           Pattern: <one-line spec, or "one-off — non-recurring">
+           Scan command: <exact command, reproducible>
+           Total instances found: <N>
+
+           | # | File:line | Form | Disposition | Reason |
+           |---|-----------|------|-------------|--------|
+           | 1 | foo.py:42 | <form> | MIGRATE | <reason> |
+           | 2 | bar.py:101 | <form> | ALLOWLIST | <false-positive reason> |
+           | 3 | baz.py:55 | <form> | DEFER | <filed ticket id> |
+           ```
+
+           Allowed dispositions:
+           - **MIGRATE**: this fix handles the instance
+           - **ALLOWLIST**: false positive; the specific reason must justify it
+           - **DEFER**: out of scope; a NAMED follow-up ticket is filed BEFORE
+             this atom closes
+
+           No row may be silently ignored.
+
+        4. **Store the scan**:
+           ```bash
+           bd update {TASK_ID} --append-notes "<disposition table above>"
+           ```
+
+        ## Gate: Add Label
+
+        ONLY after the disposition table is complete (every row dispositioned,
+        scan command recorded) AND every DEFER row has a filed ticket id:
+        ```bash
+        bd label add {TASK_ID} codebase-scan:complete
+        ```
+
+        ## Anti-Patterns
+        - Pattern unspecifiable / scope unbounded -> STOP, the task is too vague.
+        - Found instances but ignored some -> every row gets a disposition.
+        - DEFER without filing the follow-up ticket.
+
+      acceptance: "codebase-scan:complete label added (the closure criterion — do NOT close without it). Disposition table covers every found instance AND records the exact reproducible scan command. Every DEFER row points to a filed follow-up ticket."
+      depends_on: ["prep-{TASK_ID}"]
+      labels: ["atom:codebase-scan", "atom:gate"]
+
     # -- Atom 2: Implement ----------------------------------------------------
     - id: "implement-{TASK_ID}"
       title: "Implement fix for {TASK_ID}"
       description: |
-        Fix the specific weakness described in the task.
+        Fix every MIGRATE instance from the disposition table — not just the
+        motivating site.
+
+        ## Precondition
+
+        `bd show {TASK_ID}` shows the `codebase-scan:complete` label.
 
         ## Instructions
 
-        1. Re-read the plan from `bd show {TASK_ID}`
-        2. Make the fix -- change ONLY what the task describes
-        3. Self-check: read the modified function back and confirm the
+        1. Re-read the plan + disposition table from `bd show {TASK_ID}`
+        2. Fix ALL MIGRATE rows -- change ONLY what the pattern requires
+        3. Self-check: read each modified site back and confirm the
            anti-pattern is GONE
 
         ## Anti-Patterns
         - Do NOT add unrelated improvements
         - Do NOT replace one weak pattern with a different weak pattern
         - Do NOT add conditional guards that silently degrade behavior
+        - Do NOT fix only the motivating site when the table has multiple
+          MIGRATE rows
 
-      acceptance: "Function modified. Anti-pattern from task description is gone."
-      depends_on: ["prep-{TASK_ID}"]
+      acceptance: "All MIGRATE-row sites modified. Anti-pattern from the task description is gone at each."
+      depends_on: ["codebase-scan-{TASK_ID}"]
       labels: ["atom:implement"]
 
     # -- Atom 3: Verify -------------------------------------------------------
@@ -119,14 +206,89 @@ iterate:
         Run relevant structural guard tests.
 
         ## Check 3: Anti-pattern eliminated
-        Read the modified function and confirm the specific anti-pattern is GONE.
+        Read each modified site and confirm the specific anti-pattern is GONE.
 
         ## HARD STOP
         Do NOT close this atom if any check fails.
 
-      acceptance: "Quality command passes. Guards pass. Anti-pattern confirmed eliminated."
+      acceptance: "Quality command passes. Guards pass. Anti-pattern confirmed eliminated at every MIGRATE site."
       depends_on: ["implement-{TASK_ID}"]
       labels: ["atom:verify"]
+
+    # -- Atom 3b: Sweep verification gate --------------------------------------
+    - id: "sweep-verify-{TASK_ID}"
+      title: "Sweep verification for {TASK_ID}"
+      description: |
+        Confirm the disposition table is honored end-to-end AND (for a repeated
+        pattern) a structural guard pins it going forward, so a future PR can't
+        re-introduce the pattern in a new file.
+
+        ## Precondition
+
+        - `codebase-scan:complete` label on {TASK_ID}
+        - verify atom passed
+
+        ## Instructions
+
+        1. **Re-run the scan** using the EXACT command recorded in the
+           codebase-scan atom.
+
+        2. **Compute the diff**:
+
+           ```
+           ## Sweep Verification ({TASK_ID})
+
+           Re-scan command: <same as scan>
+           Pre-fix instances: <N>
+           Post-fix instances: <M>
+
+           | # | scan file:line | scan disposition | Post-fix state | Verified |
+           ```
+
+           NOTE: a MIGRATE fix shifts line numbers, so do NOT join the scan and
+           post-fix rows on `file:line`. Re-localize each row by its matched
+           CONTENT and record the new location. The deterministic check is the
+           instance-count diff (Pre-fix N vs Post-fix M); the join is by content.
+
+           Every row must verify: MIGRATE done / ALLOWLIST reason still holds /
+           DEFER ticket open.
+
+        3. **Structural guard**. Required when the pattern is REPEATED
+           (the scan found >1 instance, or it is recurrence-prone). For a
+           confirmed single-instance, non-recurring one-off, record why no
+           class-level guard applies (a guard over a one-off is noise). The
+           guard, when required, MUST:
+             - Live in `tests/test_guards_*.py` (or equivalent)
+             - Have at least one positive and one negative meta-test
+             - If regex-based, include a "would-be-missed" case as a meta-test.
+               Concrete failure mode: a `_neo_isolated_input` key slips a
+               `^neo_`-anchored regex because of the leading underscore — the
+               meta-test feeds that variant and asserts the guard still catches
+               it. (Non-regex guards have no regex-slip case; pos+neg suffice.)
+
+           Record:
+           ```bash
+           bd update {TASK_ID} --append-notes "## Structural Guard
+           - File / Class / Meta-tests: ..."
+           ```
+
+        4. **New instances detected** (NOT in the scan table): if the scan was
+           incomplete, STOP and re-do it; if this fix introduced them, FAIL and
+           re-implement.
+
+        ## Gate: Add Label
+        ```bash
+        bd label add {TASK_ID} sweep:complete
+        ```
+
+        ## Anti-Patterns
+        - All rows ALLOWLIST -> suspicious, the fix may not be doing real work.
+        - Repeated-pattern guard added but no negative meta-test -> add it.
+        - New instances found and dispositioned silently -> fail.
+
+      acceptance: "sweep:complete label added (the closure criterion — do NOT close without it). Post-fix disposition table written. For a repeated pattern, a structural guard exists with positive + negative meta-tests (plus a regex-slip meta-test when the guard is regex-based); a single-instance one-off records why no guard applies."
+      depends_on: ["verify-{TASK_ID}"]
+      labels: ["atom:sweep-verify", "atom:gate"]
 
     # -- Atom 4: Commit -------------------------------------------------------
     - id: "commit-{TASK_ID}"
@@ -134,13 +296,24 @@ iterate:
       description: |
         Stage, commit, and close the task.
 
+        ## Precondition
+
+        BOTH gate labels must be present (hard-check):
+        ```bash
+        for L in codebase-scan:complete sweep:complete; do
+          bd show {TASK_ID} | grep -q "$L" || { echo "GATE FAIL: missing $L"; exit 1; }
+        done
+        ```
+
+        ## Instructions
+
         1. Review changes: `git diff --stat`
         2. Stage specific files
         3. Commit with conventional commit message
         4. Close the task: `bd close {TASK_ID}`
 
       acceptance: "Commit exists. Task closed."
-      depends_on: ["verify-{TASK_ID}"]
+      depends_on: ["sweep-verify-{TASK_ID}"]
       labels: ["atom:commit"]
 
 # -- Finalize ------------------------------------------------------------------
