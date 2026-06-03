@@ -304,8 +304,23 @@ iterate:
         ## BANNED Patterns
 
         - `pytest.mark.xfail` is BANNED in regression tests
-        - AST-scanning / source-code pattern tests are BANNED
+        - AST-scanning / source-code pattern tests are BANNED **as a
+          substitute for behavioral testing** — when the task changes
+          behavior, the red test must exercise that behavior, not scan source.
         - Direct DB session management in test code is BANNED
+
+        ## Structural-disease tasks (no testable behavior)
+
+        Some tasks eliminate a NON-behavioral disease pattern (a casing/naming
+        wordmark, an import idiom, a helper-bypass that is type- or
+        text-shaped, not runtime-observable). For these, no behavioral failing
+        test exists — the only meaningful red artifact IS the structural guard
+        that `sweep-verify` will later require. In that case:
+        - Write that structural guard HERE, confirm it FAILS (the disease
+          instances exist), and record it as the red artifact.
+        - The AST/source-text BAN above does NOT apply — it bans source scans
+          used INSTEAD OF behavioral tests, not the structural guard that pins
+          a structural invariant. The same guard satisfies `sweep-verify`.
 
         ## Verification: Paste the FAILED Output
 
@@ -403,10 +418,14 @@ iterate:
            - DEFER rows: the follow-up ticket exists, is open, and tracks the
              remaining instance
 
-        3. **Verify the structural guard exists**. This atom REQUIRES that the
-           implementation atom added a structural guard banning future
-           instances of the disease pattern (modulo the allowlist). The guard
-           must:
+        3. **Verify the structural guard exists**. When the disposition table
+           has >=1 MIGRATE row, this atom REQUIRES that the implementation (or
+           write-test) atom added a structural guard banning future instances
+           of the disease pattern (modulo the allowlist). If the table has
+           ZERO MIGRATE rows (everything ALLOWLIST/DEFER), no code changed, so
+           the guard requirement is N/A — record why, and treat an
+           all-ALLOWLIST architectural ticket as suspicious (see anti-patterns).
+           The guard must:
              - Live in `tests/test_guards_*.py` (or equivalent)
              - Have at least one positive and one negative meta-test
              - If regex-based, include a "would-be-missed" case as a meta-test

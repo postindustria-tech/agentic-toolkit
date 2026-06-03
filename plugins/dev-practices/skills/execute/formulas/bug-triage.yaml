@@ -266,7 +266,10 @@ iterate:
            ```
 
         3. **Verify the structural guard exists** banning future instances
-           of the disease pattern. The guard MUST:
+           of the disease pattern. Required when the disposition table has
+           >=1 MIGRATE row; N/A (record why) when every row is ALLOWLIST/DEFER
+           since no code changed — an all-ALLOWLIST fix is suspicious. The
+           guard MUST:
              - Live in `tests/test_guards_*.py`
              - Include positive AND negative meta-tests
              - If regex-based, include a "would-be-missed" case as a meta-test
