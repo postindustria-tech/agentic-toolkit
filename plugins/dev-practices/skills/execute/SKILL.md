@@ -59,6 +59,21 @@ mix types in the same epic.
 
 ## Protocol
 
+### 🛑 MANDATORY: Cook a molecule. No exceptions, no judgment calls.
+
+When this skill is invoked, you MUST cook and walk a molecule. Forbidden
+rationalizations (each has caused a real deviation):
+
+- "This is meta / validation / process — no molecule needed; I'll follow the
+  ticket's Phase 1–6 manually."
+- "Cooking would be redundant / circular / overhead for a ticket this small."
+- "I'll do the work and create atoms retroactively."
+
+Ticket-internal phases describe WHAT to do; molecule atoms gate WHEN it's done.
+They are complementary — never substitutes. If a ticket looks like it doesn't
+fit a molecule, STOP and ask the user (cook anyway / different formula / opt
+out). Do NOT decide unilaterally.
+
 ### Step 1: Cook the molecule
 
 The `cook_formula.py` script is located in this skill's `scripts/` directory.
@@ -153,6 +168,15 @@ diagnostic: "Does this failure mean I violated the invariant?" If yes, revert
 and rethink. Never adjust tests to fit code without documented justification.
 
 ## Anti-Patterns
+
+### Process-level (check yourself FIRST — the #1 failure mode)
+
+- Don't skip the cook itself. "Too meta / too small / phases-already-in-ticket"
+  is not a reason — it's the deviation. Cook or stop-and-ask; no third option.
+- Don't create atoms retroactively. Cook FIRST, then walk; atoms are the
+  crash-recovery unit.
+
+### Atom-level
 
 - Don't skip atoms (even trivial ones like commits or e2e-verify)
 - Don't combine atoms (defeats crash recovery)
