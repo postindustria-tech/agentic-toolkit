@@ -148,12 +148,26 @@ iterate:
              - "module-level mutable dict in src/<pkg>/"
              - "two-named alias for the same helper (e.g. _isinstance_safe / _is_instance_safe)"
 
-        2. **Scan the WHOLE codebase** for this pattern. Use grep / AST search
-           across the entire source tree (NOT just the cited files in the
-           ticket). Concrete techniques:
+        2. **Scan the WHOLE codebase** for this pattern (NOT just the cited
+           files in the ticket). Choose the method by disease shape:
+
+           - **SEMANTIC disease** (logic re-implemented under different names, a
+             canonical helper bypassed by hand-rolled variants — where one grep
+             cannot find every variant): invoke the in-loop multi-agent targeted
+             scan, which fans out 3 disease-scoped lenses (dedup / consistency /
+             layering) + an opus elegance reviewer for architectural tickets and
+             writes per-lens findings to `.claude/code-review/{TASK_ID}/`:
+
+             ```
+             /dev-practices:code-review --targeted "<one-line disease spec>" {TASK_ID}
+             ```
+
+             Then merge the per-lens rows into the single disposition table below.
+
+           - **SYNTACTIC disease** (one exact literal / a single regex-able form):
+             a single-executor scan is sufficient — do NOT fan out:
              - Pattern grep: `grep -rn '<regex>' src/<pkg>/`
              - AST scan: `python -c "import ast; ..."` for syntactic patterns
-             - Type-check: `mypy --strict` if relevant
              - Dual-name search: `git grep -E '_(is)?_?instance_safe'`
 
         3. **Produce a disposition table** in the bead notes. Every instance
@@ -197,7 +211,10 @@ iterate:
 
         ONLY after the disposition table is complete (every row has MIGRATE /
         ALLOWLIST / DEFER + a reason) AND every DEFER row has a filed
-        follow-up ticket ID:
+        follow-up ticket ID. For a SEMANTIC disease, the targeted scan's
+        artifact directory `.claude/code-review/{TASK_ID}/` MUST exist (it is
+        the structural proof the scan actually ran — the gate is not earned by a
+        hand-waved table):
 
         ```bash
         bd label add {TASK_ID} codebase-scan:complete
@@ -214,7 +231,7 @@ iterate:
         - Skipping this atom because "the cited files are obvious" → the
           point of this atom is what's NOT in the cited files.
 
-      acceptance: "codebase-scan:complete label added (the closure criterion — do NOT close this atom without it). Disposition table in notes covers every found instance AND records the exact reproducible scan command. Every DEFER row points to a filed follow-up ticket."
+      acceptance: "codebase-scan:complete label added (the closure criterion — do NOT close this atom without it). Disposition table in notes covers every found instance AND records the exact reproducible scan command. For a semantic disease, `.claude/code-review/{TASK_ID}/` exists (targeted-scan artifact). Every DEFER row points to a filed follow-up ticket."
       depends_on: ["research-{TASK_ID}"]
       labels: ["atom:codebase-scan", "atom:gate"]
 
@@ -406,7 +423,10 @@ iterate:
         ## Instructions
 
         1. **Re-run the scan** from the codebase-scan atom. Use the EXACT same
-           command recorded in bead notes.
+           command recorded in bead notes. For a semantic disease scanned via
+           the targeted mode, re-invoke it to regenerate the post-fix table
+           mechanically instead of re-grepping by hand:
+           `/dev-practices:code-review --targeted "<same disease spec>" {TASK_ID}`
 
         2. **Compute the diff** between the Phase 1b table and current state:
 

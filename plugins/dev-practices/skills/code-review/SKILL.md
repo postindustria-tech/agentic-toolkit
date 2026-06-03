@@ -5,12 +5,95 @@ description: >
   consistency. Use when asked to "code review", "review code", "audit code",
   "multi-agent review", "architecture review", "security review", "testing
   review", "DRY review", "consistency review", "layering review", "launch
-  review agents", "review my changes", "review this PR", or needs comprehensive
-  code quality analysis. Spawns specialized review agents for each dimension.
-args: "[scope]"
+  review agents", "review my changes", "review this PR", "targeted scan",
+  "single-disease scan", "in-loop scan", or needs comprehensive code quality
+  analysis. Two modes: FULL (periodic, whole-codebase, all dimensions) and
+  `--targeted` (fast, single disease pattern, in-loop ticket phase-gate).
+args: "[scope] | --targeted \"<disease-spec>\" [ticket-id]"
 ---
 
 # Multi-Agent Code Review
+
+## Two modes
+
+| Mode | Invocation | Scope | Agents | Output | When |
+|------|-----------|-------|--------|--------|------|
+| **FULL** (default) | `code-review [scope]` | whole codebase, all dimensions | 5-7 dimensional reviewers | per-agent `.md` + `synthesis.md` | periodic / exhaustive audit |
+| **TARGETED** | `code-review --targeted "<disease-spec>" [ticket-id]` | ONE disease pattern, whole tree | 3 disease-scoped lenses + optional opus | per-lens `.md` + a one-page disposition table | fast (<5 min) in-loop ticket phase-gate |
+
+If `--targeted` is the first argument, jump to **Targeted Mode** below.
+Otherwise run the FULL protocol (the rest of this document).
+
+The two modes share one purpose contract but NOT scope: the targeted mode is
+fast and disease-specific; the full audit is periodic and exhaustive. Do not
+collapse them.
+
+---
+
+## Targeted Mode (`--targeted "<disease-spec>" [ticket-id]`)
+
+A single-disease, whole-tree scan meant to run as a phase-gate INSIDE a ticket
+(the molecule's `codebase-scan` / `sweep-verify` atoms invoke it). It answers
+"does this disease appear anywhere else?" and emits a disposition table, NOT a
+41-finding catalog.
+
+**When to use it vs. a plain grep**: the multi-agent fan-out earns its cost for
+**semantic** diseases -- logic re-implemented under different names, a helper
+bypassed by hand-rolled variants -- where one `grep` cannot find every variant.
+For a **purely syntactic** disease (one exact literal, a single regex-able
+form), a single-executor `grep` in the codebase-scan atom is sufficient; do NOT
+fan out for those.
+
+### Protocol
+
+1. **Load team + parse args**. `ToolSearch: "select:TeamCreate"`,
+   `"select:TaskCreate"`, `"select:SendMessage"`. First arg after
+   `--targeted` is the one-line DISEASE-PATTERN SPEC; the next (optional) is the
+   ticket-id.
+
+2. **Output dir keyed to the ticket** (so the artifact is discoverable and the
+   gate can require it):
+   ```bash
+   TICKET_ID="<ticket-id-or-fallback>"     # e.g. neograph-djpi
+   REVIEW_DIR=".claude/code-review/${TICKET_ID:-$(date +%d%m%y_%H%M)}"
+   mkdir -p "$REVIEW_DIR"
+   ```
+
+3. **Create team + spawn the 3 disease-scoped lenses IN ONE MESSAGE** (parallel),
+   all using the purpose-built `review-disease-scan` agent (NOT the dimensional
+   review-* agents -- those are diff-anchored and emit severity catalogs):
+
+   | name | subagent_type | lens | output file |
+   |------|---------------|------|-------------|
+   | scan-dedup | review-disease-scan | dedup | `<dir>/disease-dedup.md` |
+   | scan-consistency | review-disease-scan | consistency | `<dir>/disease-consistency.md` |
+   | scan-layering | review-disease-scan | layering | `<dir>/disease-layering.md` |
+
+   Each agent's prompt must carry the one-line disease spec, its lens, and its
+   output file. For an **architectural** ticket, also spawn an opus elegance
+   reviewer (`subagent_type: feature-dev:code-reviewer`) -> `<dir>/elegance.md`
+   answering "is the fix elegant / does this disease indicate a deeper design
+   problem?".
+
+4. **Synthesize a ONE-PAGE disposition table** (not a multi-section
+   `synthesis.md`). Merge the per-lens rows, dedup by `file:line` + `Form`,
+   keep the strictest disposition, and append to the ticket's bead notes:
+   ```
+   ## Codebase Disease Scan (<ticket-id>)
+   Pattern: <spec>
+   Scan command: <the reproducible command the lenses used>
+   Total instances: <N>
+   | # | File:line | Form | Disposition | Reason |
+   ```
+   File a NAMED follow-up ticket for every DEFER row before closing the gate.
+
+5. **Shut down the team.** The `.claude/code-review/<ticket-id>/` directory +
+   the disposition table in the bead are the gate artifact for
+   `codebase-scan:complete`.
+
+---
+
+## Full Mode
 
 ## MANDATORY: Use Agent Teams with Review Agents
 

@@ -141,8 +141,16 @@ iterate:
            Write a one-line spec — see task-execute.yaml::codebase-scan for
            examples.
 
-        2. **Scan the WHOLE codebase**. Use grep / AST search across the
-           full source tree. NOT just the file where the bug manifests.
+        2. **Scan the WHOLE codebase** (NOT just the file where the bug
+           manifests). Choose the method by disease shape:
+           - **SEMANTIC** (a rule re-implemented under different names; a helper
+             bypassed): invoke the in-loop multi-agent targeted scan (3
+             disease-scoped lenses + optional opus), which writes per-lens
+             findings to `.claude/code-review/{BUG_ID}/`:
+             `/dev-practices:code-review --targeted "<one-line disease spec>" {BUG_ID}`
+             then merge the per-lens rows into the disposition table below.
+           - **SYNTACTIC** (one exact literal / regex-able form): a single
+             grep / AST scan is sufficient — do NOT fan out.
 
         3. **Produce a disposition table** in the bead notes:
 
@@ -171,11 +179,14 @@ iterate:
 
         ## Gate: Add Label
 
+        For a SEMANTIC disease, `.claude/code-review/{BUG_ID}/` MUST exist (the
+        targeted-scan artifact — structural proof the scan ran) before labeling:
+
         ```bash
         bd label add {BUG_ID} codebase-scan:complete
         ```
 
-      acceptance: "codebase-scan:complete label added (the closure criterion — do NOT close without it). Disposition table covers every found instance AND records the exact reproducible scan command. Every DEFER points to a filed follow-up ticket."
+      acceptance: "codebase-scan:complete label added (the closure criterion — do NOT close without it). Disposition table covers every found instance AND records the exact reproducible scan command. For a semantic disease, `.claude/code-review/{BUG_ID}/` exists (targeted-scan artifact). Every DEFER points to a filed follow-up ticket."
       depends_on: ["trace-similar-{BUG_ID}"]
       labels: ["atom:codebase-scan", "atom:gate"]
 
