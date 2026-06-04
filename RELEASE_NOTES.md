@@ -1,5 +1,40 @@
 # Release Notes
 
+## dev-practices v0.2.2 - Patterns-first synthesis in `code-review` (2026-06-04)
+
+### Changed
+- **`code-review` synthesis is now patterns-first, illustrations second.** Step 6
+  reframed: the synthesis's primary output is the patterns it distills, not the
+  catalog of sites the agents enumerated. Sites are evidence for patterns, not
+  the work queue.
+- **Three recurring pattern shapes named explicitly** so future synthesizers don't
+  rediscover them: Pattern A (fix-the-cited-site, skip-the-sibling), Pattern B
+  (automated checks land, semantic-equivalent variants bypass them), Pattern C
+  (convention introduced and violated in the same change). Step 6d is now
+  load-bearing and requires shape + 3-5 illustrations + pattern-level close for
+  every named pattern.
+- **`synthesis.md` template reordered**: headline → Patterns (load-bearing) →
+  Cross-Agent Convergence table → Findings Catalog tagged with `[PAT-NN]` →
+  validation summary + metrics at the bottom. Each finding replaces "Recommended
+  action" with "Pattern-level close".
+
+### Added
+- **Step 8: reviewer-facing communication.** Explicit instructions for drafting
+  PR comments / review summaries from synthesis: lead with patterns, frame
+  cited sites as illustrations ("not the full work queue"), and name what closes
+  each pattern at the pattern level. The anti-pattern (a numbered list of
+  findings the author can patch site-by-site) is named explicitly as the
+  framing choice that generates multi-round review loops with high marginal
+  closure.
+
+### Why
+Multi-round review loops where each round closes a high fraction of named
+findings while a parallel population of sibling sites accumulates are a process
+failure rooted in framing, not in author effort. Site-anchored findings invite
+site-anchored patches that leave the underlying pattern alive at every site no
+agent grepped for. Patterns-first synthesis surfaces the shape so close-out
+work can be scoped to the pattern.
+
 ## dev-practices v0.2.1 - In-loop targeted codebase scan (2026-06-03)
 
 ### Added
