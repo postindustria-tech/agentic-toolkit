@@ -162,6 +162,22 @@ def create_atom(
     for label in global_labels + all_labels:
         add_label(bead_id, label)
 
+    # Delegation: translate a `delegate:` block into exec:* labels so the walk
+    # loop (SKILL.md Step 2) can route this atom to a fresh subagent. Atoms with
+    # no `delegate:` block carry no exec:* labels and run inline (default).
+    delegate = atom_def.get("delegate")
+    if delegate:
+        if _dry_run:
+            print(
+                f"  [DRY] delegate {atom_formula_id} -> "
+                f"agent={delegate.get('agent', 'general-purpose')} "
+                f"model={delegate.get('model', '(inherit)')}"
+            )
+        add_label(bead_id, "exec:delegate")
+        add_label(bead_id, f"exec:agent:{delegate['agent']}")
+        if delegate.get("model"):
+            add_label(bead_id, f"exec:model:{delegate['model']}")
+
     # Track barrier atoms (for depends_on_all_barriers)
     if barrier_label and (barrier_label in all_labels or atom_formula_id.startswith("commit-")):
         barrier_ids.append(bead_id)

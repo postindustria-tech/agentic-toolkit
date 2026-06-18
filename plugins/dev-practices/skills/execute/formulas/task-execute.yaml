@@ -62,49 +62,37 @@ iterate:
     - id: "research-{TASK_ID}"
       title: "Research {TASK_ID}"
       description: |
-        Execute research for beads task {TASK_ID}. All findings go into the
-        bead itself -- NOT the filesystem.
+        Research how beads task {TASK_ID} should be implemented in THIS
+        codebase. You run as the dp-researcher agent in a fresh context --
+        follow your researcher protocol: reuse-over-reinvention, current-way-
+        not-old-way (recency wins), docs-are-authoritative (flag contradictions),
+        right-level-of-abstraction, and the Core Invariant all live in your
+        system prompt. This bead carries only the task-specifics. All findings
+        go into the bead -- NEVER the filesystem.
 
-        ## Instructions
+        ## Inputs
 
-        1. **Read the task**: `bd show {TASK_ID}`
-        2. **Spec check** (if task touches schemas/protocol):
-           - Read relevant specs and schemas
-           - Check required vs optional, type constraints
-        3. **Explore the codebase**:
-           - Search for relevant code
-           - Read files that will need modification
-           - Check existing tests for the affected area
-           - Find 2-3 similar implementations to follow as patterns
-        4. **Check documentation** (doc-first rule)
-        5. **Engineering checklist** -- answer concretely:
-           - DRY: Does similar logic exist?
-           - Library idioms: How do your frameworks solve this?
-           - Data flow trace: Walk one concrete example through the full chain
-           - Existing conventions: What pattern do similar implementations follow?
-           - Test infrastructure: What fixtures/helpers exist?
-        6. **Identify architecture decisions**
-        7. **Extract the core invariant** -- State in ONE sentence the architectural
-           principle that ALL changes for this task must preserve.
+        `bd show {TASK_ID}` -- the task description and acceptance criteria.
 
-        ## Store Research in the Bead
+        ## Store research in the bead
 
         ```bash
         bd update {TASK_ID} --append-notes "## Findings
-        - [key findings]
+        - [key findings, incl. the existing primitive/component to REUSE + path]
+        - [current vs deprecated pattern, when both exist]
 
         ## Relevant Code
-        - path/to/file.py:line -- [description]
+        - path/to/file:line -- [what it does / why it's the exemplar to copy]
 
         ## Risks & Edge Cases
-        - [potential issues]"
+        - [potential issues; prefix any doc/code contradiction NEEDS USER INPUT:]"
 
         bd update {TASK_ID} --design "## Core Invariant
         [One sentence: the architectural principle every change must preserve]
 
         ## Implementation Plan
-        1. [first step]
-        2. [second step]"
+        1. [reuse/extend X ... -- not 'build something like X']
+        2. [...]"
         ```
 
         ## Gate: Add Label
@@ -114,9 +102,14 @@ iterate:
         bd label add {TASK_ID} research:complete
         ```
 
-      acceptance: "Task has research:complete label. Notes contain Findings. Design contains Core Invariant + Implementation Plan."
+      acceptance: "Task has research:complete label. Notes contain Findings (incl. the reuse target). Design contains Core Invariant + Implementation Plan."
       depends_on: ["baseline"]
       labels: ["atom:research"]
+      # Delegated to the plugin-shipped dp-researcher agent: the research method
+      # (reuse-first, recency, doc-authority, abstraction level) lives in its
+      # system prompt, so this bead stays lean.
+      delegate:
+        agent: dp-researcher
 
     # -- Atom 1b: Codebase-wide disease scan -----------------------------------
     - id: "codebase-scan-{TASK_ID}"
@@ -165,10 +158,18 @@ iterate:
              Then merge the per-lens rows into the single disposition table below.
 
            - **SYNTACTIC disease** (one exact literal / a single regex-able form):
-             a single-executor scan is sufficient — do NOT fan out:
-             - Pattern grep: `grep -rn '<regex>' src/<pkg>/`
-             - AST scan: `python -c "import ast; ..."` for syntactic patterns
-             - Dual-name search: `git grep -E '_(is)?_?instance_safe'`
+             a single-executor scan is sufficient — do NOT fan out. Prefer
+             structural tools over text grep when available:
+             - **`ast-grep`** (`sg` / `ast-grep`, if installed): the preferred
+               scan — matches code shape, not text, so it skips comments/strings
+               and catches whitespace/formatting variants a regex misses.
+             - **`.agent-index/`** (if present): consult it to enumerate the
+               definitions / call sites to scan, instead of reading whole files.
+             - Fall back to `grep -rn '<regex>' src/<pkg>/`, a `python -c "import
+               ast; ..."` scan, or `git grep` only when ast-grep is unavailable.
+
+             Whichever tool is used, record the EXACT reproducible command in the
+             disposition table (`sweep-verify` re-runs it verbatim).
 
         3. **Produce a disposition table** in the bead notes. Every instance
            found must appear:
@@ -239,9 +240,13 @@ iterate:
     - id: "review-{TASK_ID}"
       title: "Architect review of {TASK_ID}"
       description: |
-        Pragmatic architect review of the research findings for {TASK_ID}.
+        Independent adversarial review of the research + implementation plan
+        for {TASK_ID}. You run as the dp-reviewer agent in a fresh context --
+        follow your reviewer protocol: the stance, review criteria, rating
+        scale, verdict vocabulary, and recording format all live in your system
+        prompt. This bead carries only the task-specifics below.
 
-        ## Precondition
+        ## Precondition (gate hard-check)
 
         Both gate labels must be present — the labels ARE the gate, not just
         the depends_on edge (closing the upstream atom without its label is a
@@ -252,37 +257,33 @@ iterate:
         done
         ```
 
-        The architect review now evaluates the design against the FULL
-        codebase scope discovered in the codebase-scan atom — not just the
-        cited files.
+        ## Inputs
 
-        ## Review Criteria
+        `bd show {TASK_ID}` returns the research findings, the Core Invariant +
+        implementation plan, and the codebase-scan disposition table. Evaluate
+        the plan against the FULL scope in that table — not just the files the
+        ticket originally cited.
 
-        1. **Invariant alignment**: Does EVERY step maintain the Core Invariant?
-        2. **Approach soundness**: Will the plan work?
-        3. **Risk coverage**: Are risks identified and covered?
-        4. **Pattern compliance**: Does the plan follow project architecture patterns?
-        5. **Specificity**: Is the plan specific enough to implement without guessing?
-        6. **Alternatives**: Was a better approach missed?
+        ## Output
 
-        ## Rate Each Finding
-
-        - **LOW**: Minor suggestion, cosmetic, nice-to-have
-        - **MEDIUM**: Real concern but agent can resolve autonomously
-        - **HIGH**: Fundamental issue -- user input required
-
-        ## Write Review
-
+        Record your review + verdict into the task. The verdict string routes
+        the next atom, so use exactly one of the three values:
         ```bash
         bd update {TASK_ID} --append-notes "## Architect Review
         - [RATING] Finding: [description]. Suggestion: [what to do]
 
         Overall: [ALL_LOW | NEEDS_REFINEMENT | NEEDS_USER_INPUT]"
         ```
+        Do NOT close this atom or {TASK_ID}.
 
       acceptance: "Review written to task notes with rated findings and overall verdict."
       depends_on: ["codebase-scan-{TASK_ID}"]
       labels: ["atom:review", "atom:gate"]
+      # Delegated to the plugin-shipped dp-reviewer agent: the adversarial stance
+      # and rubric live in its system prompt (opus, declared in its frontmatter),
+      # so this bead stays lean. Fresh context turns self-review into real review.
+      delegate:
+        agent: dp-reviewer
 
     # -- Atom 3: Triage --------------------------------------------------------
     - id: "triage-{TASK_ID}"
@@ -319,44 +320,30 @@ iterate:
     - id: "write-test-{TASK_ID}"
       title: "Write regression test for {TASK_ID}"
       description: |
-        Write a failing test that defines the expected behavior for {TASK_ID}.
-        This is the TDD "red" step -- the test MUST exist and MUST fail before
-        any implementation begins.
+        Write the FAILING regression test that defines correct behavior for
+        {TASK_ID} (TDD red -- it MUST exist and MUST fail before implementation).
+        You run as the dp-test-author agent in a fresh context -- follow your
+        test-author protocol: the test-level decision (integration/E2E by
+        default, unit only for pure logic), the no-mocking-the-DB rule,
+        edge-case modeling, and the banned patterns all live in your system
+        prompt. This bead carries only the task-specifics.
 
-        ## Instructions
+        ## What to test
 
-        1. Identify what to test from the implementation plan
-        2. Choose test level (prefer integration over unit when DB involved)
-        3. Write the failing test
-        4. Use test factories for test data (never inline model construction)
-        5. Run and confirm it fails for the RIGHT reason (AssertionError, not ImportError)
+        Read {TASK_ID}'s implementation plan and Core Invariant (`bd show
+        {TASK_ID}`) and write the test that pins the behavior that plan creates.
 
-        ## BANNED Patterns
+        ## Structural-disease exception (skill-specific)
 
-        - `pytest.mark.xfail` is BANNED in regression tests
-        - AST-scanning / source-code pattern tests are BANNED **as a
-          substitute for behavioral testing** — when the task changes
-          behavior, the red test must exercise that behavior, not scan source.
-        - Direct DB session management in test code is BANNED
+        Some tasks eliminate a NON-behavioral disease pattern (a naming/casing
+        wordmark, an import idiom, a type- or text-shaped helper-bypass) with no
+        runtime-observable behavior. For those ONLY, the red artifact is the
+        structural guard that `sweep-verify` later requires: write that guard
+        here, confirm it FAILS (the disease instances exist), and record it as
+        the red artifact. This is the one case where a source/structural check
+        IS the test rather than a banned substitute for one.
 
-        ## Structural-disease tasks (no testable behavior)
-
-        Some tasks eliminate a NON-behavioral disease pattern (a casing/naming
-        wordmark, an import idiom, a helper-bypass that is type- or
-        text-shaped, not runtime-observable). For these, no behavioral failing
-        test exists — the only meaningful red artifact IS the structural guard
-        that `sweep-verify` will later require. In that case:
-        - Write that structural guard HERE, confirm it FAILS (the disease
-          instances exist), and record it as the red artifact.
-        - The AST/source-text BAN above does NOT apply — it bans source scans
-          used INSTEAD OF behavioral tests, not the structural guard that pins
-          a structural invariant. The same guard satisfies `sweep-verify`.
-
-        ## Verification: Paste the FAILED Output
-
-        You MUST see the word "FAILED" in pytest output.
-
-        ## Store Test Reference
+        ## Store the test reference
 
         ```bash
         bd update {TASK_ID} --append-notes "## Regression Test
@@ -364,11 +351,17 @@ iterate:
         - Status: FAILING (expected -- TDD red step)
         - Tests expected behavior: [one sentence]"
         ```
+        Do NOT close this atom or {TASK_ID}.
 
       acceptance: "Failing test exists. Test reference written to task notes."
       depends_on: ["triage-{TASK_ID}"]
       depends_on_prev_barrier: true
       labels: ["atom:write-test"]
+      # Delegated to the plugin-shipped dp-test-author agent: the testing
+      # philosophy (integration-first, no DB mocking, edge-case modeling, banned
+      # patterns) lives in its system prompt, so this bead stays lean.
+      delegate:
+        agent: dp-test-author
 
     # -- Atom 5: Implement (TDD Green + Refactor) -----------------------------
     - id: "implement-{TASK_ID}"

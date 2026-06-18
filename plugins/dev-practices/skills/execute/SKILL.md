@@ -118,10 +118,15 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/dev-practices-execute/scripts/cook_formula.
 
 ### Step 2: Walk the molecule
 
-Execute atoms one at a time:
+Execute atoms one at a time. Before executing each, check whether it is
+**delegated** (carries the `exec:delegate` label):
 
 ```
-bd ready  ->  bd show <atom-id>  ->  read description  ->  execute  ->  bd close <atom-id>  ->  repeat
+bd ready -> bd show <atom-id> ->
+  exec:delegate label present?
+    NO  -> execute inline -> bd close <atom-id>
+    YES -> dispatch a fresh subagent (see below) -> verify outputs -> bd close <atom-id>
+  -> repeat
 ```
 
 Each atom's description is self-contained:
@@ -130,6 +135,58 @@ Each atom's description is self-contained:
 - **Acceptance Criteria**: How to verify the atom is done
 
 If context compacts mid-workflow: `bd ready` picks up where you left off.
+
+#### Delegated atoms (fresh-context dispatch)
+
+Some atoms run better in a **fresh context** -- exploration, independent review,
+and test design lose quality when they share a context already polluted by
+implementation thinking. Those atoms carry an `exec:delegate` label (cooked from
+a `delegate:` block in the formula). The bead is the hand-off channel: a
+delegated atom reads its inputs via `bd show` and writes its outputs back via
+`bd update`, so a fresh subagent needs nothing from your conversation.
+
+Read the dispatch directive from the atom's labels (`bd show <atom-id>`):
+- `exec:agent:<type>`  -- the `subagent_type` to spawn (e.g. `general-purpose`)
+- `exec:model:<model>` -- optional model override (e.g. `opus`); absent -> inherit
+
+Spawn ONE subagent at a time (sequential -- the atoms within a task form a chain,
+so no parallelism is needed) via the Agent tool:
+
+```
+Agent(
+  subagent_type: <exec:agent value>,
+  model:         <exec:model value, if present>,
+  prompt: "Execute beads atom <atom-id>. Run `bd show <atom-id>` and follow its
+           description EXACTLY. Write every output back into the bead with
+           `bd update`, and add any gate label the description specifies. Do NOT
+           close the atom or any task. Return a 3-line summary: what you did,
+           where you recorded it, and which gate label you added (if any)."
+)
+```
+
+**You (the orchestrator) own closure -- never the subagent.** When it returns:
+1. Verify outputs landed: the gate label is present (`bd show <atom-id> | grep
+   <gate-label>`) and/or the acceptance evidence is in the bead notes/design.
+2. If the gate or evidence is missing, the subagent did NOT earn the close --
+   send it back (re-dispatch) or finish inline. Do not close on its say-so.
+3. `bd close <atom-id>`.
+
+This keeps a single closer, and the formula's existing gate hard-checks
+(`grep -q research:complete || exit 1`) do double duty as the "did the subagent
+actually deliver?" check -- a subagent that skips or rationalizes cannot fake the gate.
+
+**Default-delegated atoms (task-execute):** each runs in a fresh context, backed
+by a plugin-shipped agent that carries the role invariant in its system prompt:
+- `research` -> **`dp-researcher`** (reuse-first, current-way-not-old-way, docs
+  authoritative, right level of abstraction).
+- `review` -> **`dp-reviewer`** (adversarial stance + rubric incl. a reuse bias;
+  opus via its frontmatter).
+- `write-test` -> **`dp-test-author`** (integration-first testing philosophy +
+  edge-case modeling).
+
+All other atoms (and all of `task-single` / `bug-triage`) run inline. To delegate
+another atom, add a `delegate:` block to it in the formula; point `agent:` at a
+plugin-shipped agent to move that role's invariant out of the bead.
 
 **Gate labels** (formula-dependent):
 - task-execute: `research:complete` on the task before review proceeds
@@ -180,6 +237,8 @@ and rethink. Never adjust tests to fit code without documented justification.
 
 - Don't skip atoms (even trivial ones like commits or e2e-verify)
 - Don't combine atoms (defeats crash recovery)
+- Don't close a delegated atom on the subagent's say-so -- verify its outputs (gate label / acceptance evidence) landed in the bead first
+- Don't let a delegated subagent close the atom or any task -- the orchestrator is the single closer
 - Don't hold workflow state in memory (it's in beads)
 - Don't store research on filesystem (it goes in the bead)
 - Don't proceed past review without the gate label (`research:complete` or `reproduce:complete`)
