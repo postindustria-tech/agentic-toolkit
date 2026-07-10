@@ -254,7 +254,7 @@ and rethink. Never adjust tests to fit code without documented justification.
 - Don't write tests that pass immediately (unless guarding existing behavior in a refactor)
 - Don't use pytest.mark.xfail in regression tests -- xfail is NOT a failing test
 - Don't use AST/source-code scanning as regression tests -- test behavior, not code text
-- Don't write unit tests when an integration test is feasible -- mock-heavy tests are echo chambers
+- Don't write unit tests when an integration test is feasible -- mock-heavy tests are echo chambers. And when it is NOT feasible, that blocks closing the task; it does NOT downgrade a unit test into proof (see "Proof Must Match the Acceptance's Locus")
 - Don't report "done" if the regression test never produced a FAILED output
 
 ## Test Integrity -- ZERO TOLERANCE
@@ -267,6 +267,37 @@ These rules apply to EVERY atom, not just finalize:
 - If a test needs infrastructure -> start it (your project should have automation for this)
 - If infrastructure is broken -> STOP and report as blocker, do NOT skip
 - Test results persist as JSON -- use these to review results instead of re-running
+
+### Proof Must Match the Acceptance's Locus
+
+Green gates are not proof unless the test exercises **where the acceptance
+actually lives**. Two rules close the gap that lets a passing unit test
+masquerade as a proven deliverable:
+
+- **Evidence must hit the acceptance's locus.** If a task's acceptance is an
+  **external side effect** -- a network fetch, a write to S3/a DB, a message
+  sent, a file produced -- then only a test that drives *that* surface is proof.
+  A unit test of an internal component (however pure, however green) proves a
+  **sub-claim**, never the acceptance. Reporting the sub-claim ("parsing is
+  correct") as the claim ("reviews land in S3") is a category error and counts
+  as reporting success while skipping the real test.
+
+- **Infeasible integration BLOCKS closure -- it never downgrades the bar.**
+  "Integration when feasible" (above) is not an escape hatch. When the
+  acceptance-level test cannot run (missing credentials, no writable bucket, an
+  external service you can't reach), that infeasibility is a **blocker on
+  closing the task**, not a license to substitute a unit test of the pure core.
+  You MAY land and commit the code and close the *implementation atom* (the
+  TDD-red pure-core test passing is a legitimate atom gate); you MUST leave the
+  originating task `open`/`blocked` on the missing dependency, file it, and say
+  plainly that the live path is unproven. Never call such a task "done" or
+  "complete".
+
+Corollary: the locus decides the level -- this is NOT "always e2e". A task whose
+acceptance is a **local, in-process transform** (e.g. a dbt model over data
+already on disk) is fully proven by an integration test that runs the real
+transform over real inputs; no external surface is involved, so that IS the
+acceptance's locus. Match the evidence to the locus, up or down.
 
 ## Available Formulas
 
