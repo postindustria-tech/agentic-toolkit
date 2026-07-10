@@ -2,6 +2,23 @@
 
 All notable changes to the dev-practices plugin are documented here.
 
+## 0.4.0
+
+### Added
+
+- **`semantic-merge` skill** — merge, consolidate, or integrate branches so the
+  RESULT is correct, not merely conflict-free. Maps the branch DAG, sizes the TRUE
+  conflict surface with a `merge-tree` simulation (not the inflated
+  files-touched-by-both count), isolates the work in a throwaway worktree, splits
+  conflicts into mechanical (rule-resolved: baselines, lockfiles, ledgers, data
+  markers) vs semantic, resolves each semantic file with a fresh-context per-file
+  subagent doing a union-of-intent merge, then verifies with a
+  compile → lint → import-all → behavior-suite coherence gate before committing with
+  an auditable resolution ledger. Hard rules: never content-merge generated or
+  tool-owned data files (pin or regenerate); "unit-green" is not "merge-correct"; a
+  clean auto-merge still needs review. Ships `scripts/merge-survey.sh` for the
+  DAG + conflict-surface survey (Phases 1–2).
+
 ## 0.3.0
 
 ### Added
