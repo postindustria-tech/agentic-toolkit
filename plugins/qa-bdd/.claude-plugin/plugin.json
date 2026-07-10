@@ -1,6 +1,6 @@
 {
   "name": "qa-bdd",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "BDD quality assurance tools for pytest-bdd projects. Provides systematic methodologies for auditing step definitions, inspecting assertion completeness, developing new steps, and enforcing BDD code quality with ast-grep rules.",
   "author": {
     "name": "Konst",

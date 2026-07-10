@@ -877,6 +877,12 @@ def main() -> None:
     )
     parser.add_argument("--output", type=Path, default=None, help="Output report path")
     parser.add_argument("--then-only", action="store_true", default=True)
+    parser.add_argument(
+        "--filter-names",
+        type=Path,
+        default=None,
+        help="File containing function names (one per line) to limit inspection to",
+    )
     args = parser.parse_args()
 
     if args.output is None:
@@ -899,6 +905,20 @@ def main() -> None:
     then_steps = [s for s in all_steps if s.step_type == "then"]
     linked = sum(1 for s in then_steps if s.scenarios)
     print(f"  {linked}/{len(then_steps)} Then steps linked to scenarios")
+
+    # Filter by name file if provided
+    if args.filter_names:
+        filter_set = {
+            line.strip()
+            for line in args.filter_names.read_text().splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        }
+        then_steps = [s for s in then_steps if s.function_name in filter_set]
+        unmatched = filter_set - {s.function_name for s in then_steps}
+        print(f"  Filtered to {len(then_steps)} steps ({len(unmatched)} names not found)")
+        if unmatched:
+            for name in sorted(unmatched)[:10]:
+                print(f"    Not found: {name}")
 
     # Filter targets
     if args.then_only:
