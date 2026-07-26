@@ -69,7 +69,7 @@ git merge-tree --write-tree --name-only A B    # exit 1 + the ACTUALLY-conflicti
 This is what you plan against — often an order of magnitude smaller than the overlap
 count. If it exits 0, the merge is textually clean (still run Phases 6–7).
 
-## Phase 3 — Isolate in a worktree
+## Phase 3 — Isolate in a worktree; ASSERT the base
 
 ```bash
 git worktree add <path> -b <result-branch> <base>
@@ -77,6 +77,24 @@ cd <path>
 ```
 
 Your primary working tree — uncommitted changes, shared data stores — is never at risk.
+
+**Reusing an existing merge worktree?** Its branch pointer is stale by definition. Sync it,
+then GATE on the result with an assertion that fails — never output you eyeball:
+
+```bash
+git merge --ff-only <base>                       # do NOT pipe through tail/head — read errors
+test "$(git rev-parse HEAD)" = "$(git rev-parse <base>)" || { echo "BASE MISMATCH — stop"; exit 1; }
+git status --porcelain | grep -q . && { echo "DIRTY WORKTREE — stop"; exit 1; }
+```
+
+Why this is a hard gate, not hygiene: a fast-forward can print `Updating x..y` and still
+abort (checkout refusal over leftover worktree state), leaving HEAD at the stale base. If
+the incoming branch also contains your own lineage (a squash-merge of an ancestor PR is the
+classic case), the merge then resolves CLEANLY to an old-but-coherent tree — every per-file
+resolver and targeted test passes, and your newest commits are silently reverted. The only
+behavioral detector is Phase 7's pass-count comparison; this assertion is the cheap
+structural one. Same rule for state-changing git anywhere in this skill: check exit codes,
+never truncate diagnostics with `| tail`.
 
 ## Phase 4 — Merge in dependency order; triage each conflict into two buckets
 
@@ -143,9 +161,17 @@ Cheapest-to-slowest; stop at the first failure and fix before proceeding:
    contradict each other.
 4. **Behavior suite** — integration / BDD / e2e, not just unit. This is the merge
    gate for any behavior change.
+5. **Pass-count comparison vs the pre-merge baseline** — for every suite, compare
+   PASSED (and xfailed/skipped) counts against each parent's last known report, and
+   explain every drop. A green suite CANNOT detect regression-to-xfail or
+   regression-to-skip: tests that quietly slide from passing to expected-failure
+   never fail anything. This layer caught a merge that silently reverted 205
+   passing scenarios while layers 1–4 were all green. A drop is guilty until each
+   member is individually explained (deliberate retirement with citation, or
+   deduplication with the surviving test named).
 
 Green at layers 1–3 means the per-file resolutions are mutually consistent; layer 4
-confirms behavior is preserved.
+confirms behavior is preserved; layer 5 confirms no coverage silently degraded.
 
 ## Phase 8 — Commit, pin, push
 
