@@ -2,6 +2,24 @@
 
 All notable changes to the dev-practices plugin are documented here.
 
+## 0.4.1
+
+### Fixed
+
+- **`semantic-merge`: base-assertion gate for reused worktrees (Phase 3).** A reused
+  merge worktree's stale branch pointer, combined with an upstream that squash-merged
+  the target branch's own lineage, produced a clean-looking merge that silently
+  reverted the target's newest commits — the ff-sync aborted after printing
+  `Updating x..y` (diagnostics truncated by a `tail` pipe) and every downstream check
+  passed against the coherent-but-old tree. Phase 3 now requires an assertion that
+  HEAD equals the intended base (and the worktree is clean) before merging, and bans
+  truncating state-changing git output.
+- **`semantic-merge`: pass-count comparison as Phase 7 layer 5.** A green behavior
+  suite structurally cannot detect regression-to-xfail/skip; the coherence gate now
+  ends with a per-suite PASSED-count comparison against each parent's pre-merge
+  baseline, with every drop individually explained. This layer is what caught the
+  205-scenario silent reversion above.
+
 ## 0.4.0
 
 ### Added
