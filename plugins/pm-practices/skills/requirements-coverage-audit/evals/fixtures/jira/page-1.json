@@ -1,0 +1,335 @@
+{
+  "isLast": false,
+  "nextPageToken": "synthetic-page-2",
+  "issues": [
+    {
+      "id": "90001",
+      "key": "DEMO-1",
+      "self": "https://jira.example.invalid/rest/api/3/issue/90001",
+      "fields": {
+        "summary": "Member registration",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Residents can create library membership. AC: a new resident can register."
+                }
+              ]
+            }
+          ]
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "assignee": {
+          "displayName": "Morgan Example",
+          "accountId": "synthetic-account-1"
+        },
+        "fixVersions": [
+          {
+            "id": "901",
+            "name": "Opening day"
+          }
+        ],
+        "parent": {
+          "key": "DEMO-100"
+        },
+        "issuelinks": []
+      }
+    },
+    {
+      "id": "90002",
+      "key": "DEMO-2",
+      "self": "https://jira.example.invalid/rest/api/3/issue/90002",
+      "fields": {
+        "summary": "Equipment catalogue",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Residents can browse all available equipment. AC: catalogue lists equipment."
+                }
+              ]
+            }
+          ]
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "assignee": {
+          "displayName": "Morgan Example",
+          "accountId": "synthetic-account-1"
+        },
+        "fixVersions": [
+          {
+            "id": "901",
+            "name": "Opening day"
+          }
+        ],
+        "parent": {
+          "key": "DEMO-100"
+        },
+        "issuelinks": []
+      }
+    },
+    {
+      "id": "90003",
+      "key": "DEMO-3",
+      "self": "https://jira.example.invalid/rest/api/3/issue/90003",
+      "fields": {
+        "summary": "Loan alerts",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Email overdue alerts are in scope. SMS overdue alerts are excluded from this ticket; no replacement work is identified."
+                }
+              ]
+            }
+          ]
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "assignee": {
+          "displayName": "Morgan Example",
+          "accountId": "synthetic-account-1"
+        },
+        "fixVersions": [
+          {
+            "id": "902",
+            "name": "Lending desk"
+          }
+        ],
+        "parent": {
+          "key": "DEMO-100"
+        },
+        "issuelinks": []
+      }
+    },
+    {
+      "id": "90004",
+      "key": "DEMO-4",
+      "self": "https://jira.example.invalid/rest/api/3/issue/90004",
+      "fields": {
+        "summary": "Reservation creation",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Members can submit equipment reservations. AC: reservation request is stored."
+                }
+              ]
+            }
+          ]
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "assignee": {
+          "displayName": "Morgan Example",
+          "accountId": "synthetic-account-1"
+        },
+        "fixVersions": [
+          {
+            "id": "901",
+            "name": "Opening day"
+          }
+        ],
+        "parent": {
+          "key": "DEMO-100"
+        },
+        "issuelinks": []
+      }
+    },
+    {
+      "id": "90005",
+      "key": "DEMO-5",
+      "self": "https://jira.example.invalid/rest/api/3/issue/90005",
+      "fields": {
+        "summary": "Desk reporting",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Staff can export the loan register as CSV, and inspect an audit log of staff edits. AC: exported CSV contains loan rows; audit log records actor and time for each edit."
+                }
+              ]
+            }
+          ]
+        },
+        "status": {
+          "name": "Done"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "assignee": {
+          "displayName": "Morgan Example",
+          "accountId": "synthetic-account-1"
+        },
+        "fixVersions": [
+          {
+            "id": "902",
+            "name": "Lending desk"
+          }
+        ],
+        "parent": {
+          "key": "DEMO-100"
+        },
+        "issuelinks": []
+      }
+    },
+    {
+      "id": "90006",
+      "key": "DEMO-6",
+      "self": "https://jira.example.invalid/rest/api/3/issue/90006",
+      "fields": {
+        "summary": "Screen reader navigation",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Only paint the weather widget blue. Acceptance: weather widget is blue. No navigation behavior is included."
+                }
+              ]
+            }
+          ]
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "assignee": {
+          "displayName": "Morgan Example",
+          "accountId": "synthetic-account-1"
+        },
+        "fixVersions": [
+          {
+            "id": "902",
+            "name": "Lending desk"
+          }
+        ],
+        "parent": {
+          "key": "DEMO-100"
+        },
+        "issuelinks": []
+      }
+    },
+    {
+      "id": "90007",
+      "key": "DEMO-7",
+      "self": "https://jira.example.invalid/rest/api/3/issue/90007",
+      "fields": {
+        "summary": "Fee processing",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Late fee calculation is deferred until a separate workflow is implemented. No destination issue is specified."
+                }
+              ]
+            }
+          ]
+        },
+        "status": {
+          "name": "Done"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "assignee": {
+          "displayName": "Morgan Example",
+          "accountId": "synthetic-account-1"
+        },
+        "fixVersions": [
+          {
+            "id": "902",
+            "name": "Lending desk"
+          }
+        ],
+        "parent": {
+          "key": "DEMO-100"
+        },
+        "issuelinks": []
+      }
+    },
+    {
+      "id": "90008",
+      "key": "DEMO-8",
+      "self": "https://jira.example.invalid/rest/api/3/issue/90008",
+      "fields": {
+        "summary": "Hold notification",
+        "status": {
+          "name": "To Do"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "assignee": {
+          "displayName": "Morgan Example",
+          "accountId": "synthetic-account-1"
+        },
+        "fixVersions": [
+          {
+            "id": "902",
+            "name": "Lending desk"
+          }
+        ],
+        "parent": {
+          "key": "DEMO-100"
+        },
+        "issuelinks": []
+      }
+    }
+  ]
+}

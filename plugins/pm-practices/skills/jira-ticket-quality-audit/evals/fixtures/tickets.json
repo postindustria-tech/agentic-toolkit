@@ -1,0 +1,572 @@
+{
+  "issues": [
+    {
+      "key": "DEMO-1",
+      "fields": {
+        "issuetype": {
+          "name": "Story"
+        },
+        "status": {
+          "name": "QA"
+        },
+        "summary": "Archive reservation chat",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Why: Members need to retain their reservation history."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "What: On cancellation, permanently delete the reservation chat. Display status Pending. Source: rules.md, Cancellation."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "AC: After cancellation, chat remains readable by its original members, posting is disabled, and outsiders cannot read it."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-2",
+      "fields": {
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "summary": "Add reservation CSV export",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Why: Staff need offline reservation records."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "What: Add CSV download of reservation ID and status, implement a new email alert service, and build staff audit-log search with actor/date filters. Export for staff only; nonstaff requests denied. Empty export has headers. Email recipients and audit access still undecided. Email templates depend on the separate design task, not yet identified."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "AC: Staff downloads contain the specified columns. Works correctly."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-3",
+      "fields": {
+        "issuetype": {
+          "name": "Bug"
+        },
+        "status": {
+          "name": "QA Rejected"
+        },
+        "summary": "Reservation page does not work properly",
+        "description": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-4",
+      "fields": {
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "On Hold"
+        },
+        "summary": "Set reservation dialog field gap to 12px",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Change the vertical gap between the two fields in the reservation dialog from 8px to 12px at all viewport widths. No other changes."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": {
+          "key": "DEMO-9"
+        },
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-5",
+      "fields": {
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "Review"
+        },
+        "summary": "Choose a reservation calendar layout",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Question: grid or agenda for the next calendar design? Constraints: keyboard navigation and a 320px viewport. Expected output: annotated wireframes for both options and a recommendation naming the tradeoff. This is a design decision, not implementation."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-6",
+      "fields": {
+        "issuetype": {
+          "name": "Subtask"
+        },
+        "status": {
+          "name": "In Progress"
+        },
+        "summary": "Add reservation export headers",
+        "description": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": {
+          "key": "DEMO-90"
+        },
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-7",
+      "fields": {
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "On Hold"
+        },
+        "summary": "Remove unused helper argument and add return annotation",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Why: helper.py resolve still accepts unused argument legacy; remove it to avoid misleading callers."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "What: Remove legacy from resolve and add a str return annotation. Base for this claim: main. No other change."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "AC: resolve takes only user and declares a str return annotation; resolving a string returns it unchanged."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-8",
+      "fields": {
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "summary": "Add cancellation confirmation dialog",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Why: Prevent accidental cancellation."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "What: Show Confirm/Keep dialog before cancellation. Priority: High. Parent: DEMO-9. Blocked by DEMO-5's design decision."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "AC: Keep preserves the reservation. Confirm cancels it once. Keyboard focus begins on Keep; Escape keeps the reservation. Source: rules.md, Confirmation."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": {
+          "key": "DEMO-90"
+        },
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-9",
+      "fields": {
+        "issuetype": {
+          "name": "Epic"
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "summary": "Improve reservation dialog spacing",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Outcome: Correct the field spacing in the reservation dialog. Scope is the exact visual adjustment in child DEMO-4; no behavior changes. Children: DEMO-4."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-10",
+      "fields": {
+        "issuetype": {
+          "name": "Bug"
+        },
+        "status": {
+          "name": "QA"
+        },
+        "summary": "Empty reservation search returns 500",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Why: Staff cannot view the empty-result state."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Steps: On test build 2, sign in as staff; GET /reservations?q=zz-no-match in a seeded empty account."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Expected: HTTP 200 with an empty array, per rules.md Search."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Actual: HTTP 500, body {error: no records}. Repeated twice with the same request. No browser dependency."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "AC: That query returns 200 and []; existing matches remain unchanged."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-11",
+      "fields": {
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "Done"
+        },
+        "summary": "Old export cleanup",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Old completed task."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-12",
+      "fields": {
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "QA Accepted"
+        },
+        "summary": "Old reservation color change",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Previously accepted task."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-90",
+      "fields": {
+        "issuetype": {
+          "name": "Epic"
+        },
+        "status": {
+          "name": "Done"
+        },
+        "summary": "Export prototype",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The old export prototype is complete. No follow-up work remains; its only child was DEMO-6."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    }
+  ],
+  "isLast": true
+}

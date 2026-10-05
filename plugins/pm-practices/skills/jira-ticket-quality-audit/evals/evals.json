@@ -1,0 +1,46 @@
+{
+  "skill_name": "jira-ticket-quality-audit",
+  "evals": [
+    {
+      "id": 1,
+      "name": "mixed-backlog",
+      "prompt": "Audit DEMO-1 through DEMO-12 using tickets.json, snapshot.md, rules.md and supplied repository at base main. Write assessment to output/.",
+      "files": [
+        "fixtures/tickets.json",
+        "fixtures/snapshot.md",
+        "fixtures/rules.md"
+      ],
+      "repository_setup": "See procedure.md: clean main has resolve(user), working has resolve(user, legacy); both lack return annotations.",
+      "expectations": [
+        "Exactly ten eligible scored rows DEMO-1 through DEMO-10; DEMO-11/12 excluded and DEMO-90 context-only. Active QA, QA Rejected and On Hold remain included.",
+        "DEMO-1 Correctness incorrect for delete/retain conflict and Consistency incorrect for Pending vs Reserved, citing current source; incorrect findings precede hidden scope and cheap gaps.",
+        "DEMO-2 hidden independent CSV/email/audit scope and unresolved design destination are surfaced; vague AC is weak and missing design destination is limited to available evidence.",
+        "DEMO-3 genuinely empty bug has missing reproduction evidence; DEMO-10 sufficient request/expected/actual evidence is not penalized for lacking screenshot or browser details.",
+        "DEMO-4 uses light pass without mandatory Why/design link; DEMO-5 research output and DEMO-9 coherent epic/child are not judged as oversized implementation tasks.",
+        "DEMO-6 full empty description and completed parent DEMO-90 are read; unfinished-child conflict is flagged without automatically closing it.",
+        "DEMO-7 checked on main commit (not working) has stale argument-removal diagnosis scored incorrect while valid return-annotation work is preserved. User checkout remains working and unchanged.",
+        "DEMO-8 priority, parent and blocker metadata mismatches are named against prose and snapshot convention.",
+        "Nine rubric columns, every non-good/applicability note, sources and source-absence limitations, reconciled counts, no numeric aggregate, no Jira writes/implementation claims; readiness agrees with defects."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "incomplete-rerun",
+      "prompt": "Refresh the assessment using rerun-page.json, rerun-snapshot.md, rules.md and previous.md; write to output/.",
+      "files": [
+        "fixtures/rerun-page.json",
+        "fixtures/rerun-snapshot.md",
+        "fixtures/rules.md",
+        "fixtures/previous.md"
+      ],
+      "expectations": [
+        "Nonfinal page/missing next page is reported; five retrieved keys, four eligible, one Done excluded, with no whole-backlog completeness claim.",
+        "DEMO-7 omitted description/metadata and unavailable repository are unassessed, not missing, n/a, good or resolved; old stale diagnosis remains unverified.",
+        "DEMO-1 old contradiction and vocabulary findings resolved using current text/source; DEMO-3 left scope due to Done, not proven defect resolution.",
+        "DEMO-4 On Hold to QA transition and newly observed DEMO-13 recorded; missing-page DEMO-20 not declared left scope or fixed.",
+        "DEMO-9 inaccessible parent/context noted where relevant; available positive findings retained without inferred inaccessible content.",
+        "Per-ticket nine-column table with explicit unassessed notation, evidence-backed rerun section and consistent qualified readiness; no live calls or mutations."
+      ]
+    }
+  ]
+}

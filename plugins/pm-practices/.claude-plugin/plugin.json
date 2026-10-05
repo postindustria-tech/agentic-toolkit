@@ -1,0 +1,22 @@
+{
+  "name": "pm-practices",
+  "version": "0.1.0",
+  "description": "Project-management skills for requirements coverage across documents and Jira plans, Jira ticket-quality audits, approval-based ticket refinement, and rubric-checked creation of new tickets. Includes requirements-coverage-audit, jira-ticket-quality-audit, jira-ticket-refinement, and jira-ticket-creation.",
+  "author": {
+    "name": "Postindustria Tech",
+    "email": "tech@postindustria.com"
+  },
+  "homepage": "https://github.com/postindustria-tech/agentic-toolkit",
+  "repository": "https://github.com/postindustria-tech/agentic-toolkit",
+  "keywords": [
+    "project-management",
+    "requirements-coverage",
+    "sow",
+    "milestones",
+    "jira",
+    "ticket-quality",
+    "ticket-refinement",
+    "ticket-creation"
+  ],
+  "license": "MIT"
+}

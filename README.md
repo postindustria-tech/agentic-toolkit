@@ -1,6 +1,6 @@
 # Agentic Toolkit
 
-Claude Code plugin marketplace for building agentic systems. Four plugins covering LangGraph development, development practices, BDD quality assurance, and the neograph graph compiler.
+Claude Code plugin marketplace for building agentic systems. Five plugins covering LangGraph development, development practices, BDD quality assurance, the neograph graph compiler, and project-management practices for Jira and document-based plans.
 
 ## Installation
 
@@ -13,6 +13,7 @@ Claude Code plugin marketplace for building agentic systems. Four plugins coveri
 /plugin install dev-practices@agentic-toolkit
 /plugin install qa-bdd@agentic-toolkit
 /plugin install neograph-dev@agentic-toolkit
+/plugin install pm-practices@agentic-toolkit
 ```
 
 **Upgrading from pi-dev?** See [UPGRADE.md](UPGRADE.md) for instructions.
@@ -102,6 +103,25 @@ Development toolkit for the [neograph](https://neograph.pro) declarative LLM gra
 
 ---
 
+### PM Practices (`pm-practices`) - v0.1.0
+
+Project-management skills for requirements coverage, Jira ticket quality, refinement and creation. Project agnostic: site, project and field ids come from your private config. See [plugins/pm-practices/README.md](plugins/pm-practices/README.md) for setup.
+
+| Component | Count | Status |
+|-----------|-------|--------|
+| Skills | 4 | Production ready |
+
+**Skills:**
+
+| Skill | Purpose |
+|-------|---------|
+| `requirements-coverage-audit` | Do document milestones and Jira plans cover every agreed requirement? Read-only |
+| `jira-ticket-quality-audit` | Score open tickets on a nine-dimension rubric. Read-only |
+| `jira-ticket-refinement` | Draft and apply approved descriptions, acceptance criteria, points and fields |
+| `jira-ticket-creation` | Turn a brief into approved new tickets, including breakdowns, checked against the rubric |
+
+---
+
 ## Team Auto-Install
 
 Add to your project's `.claude/settings.json`:
@@ -120,7 +140,8 @@ Add to your project's `.claude/settings.json`:
     "langgraph-dev@agentic-toolkit": true,
     "dev-practices@agentic-toolkit": true,
     "qa-bdd@agentic-toolkit": true,
-    "neograph-dev@agentic-toolkit": true
+    "neograph-dev@agentic-toolkit": true,
+    "pm-practices@agentic-toolkit": true
   }
 }
 ```

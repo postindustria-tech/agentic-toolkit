@@ -1,0 +1,168 @@
+{
+  "skill_name": "requirements-coverage-audit",
+  "path_bases": {
+    "fixture": "relative to this evals directory",
+    "private_input": "relative to the toolkit repository root"
+  },
+  "evals": [
+    {
+      "id": "synthetic-full",
+      "inputs": [
+        "fixtures/harbor-sow.md"
+      ],
+      "prompt": "Use requirements-coverage-audit to check whether all delivery windows in harbor-sow.md cover the agreed scope. Write reports to the supplied output directory.",
+      "expectations": [
+        {
+          "id": "absent",
+          "assertion": "Identify S2 Loan history as absent from the whole plan with source evidence; do not equate transaction recording with a member history page."
+        },
+        {
+          "id": "implicit",
+          "assertion": "Identify S3 Email change as implicit under Opening day's Member profile maintenance, citing the source and broader bullet."
+        },
+        {
+          "id": "excluded",
+          "assertion": "Account for S4 Deposit refund as excluded by D1, citing D1; do not report it as a gap."
+        },
+        {
+          "id": "unsupported",
+          "assertion": "Identify Weather forecast widget as an unsupported Lending desk bullet by name, with its plan anchor and explanation of missing authoritative backing."
+        },
+        {
+          "id": "accounting",
+          "assertion": "Ledger accounts for S1-S5 exactly once; headline counts match rows. S1 and S5 are explicit in Opening day. Additional unsupported bullets are allowed and counted separately."
+        },
+        {
+          "id": "artifacts",
+          "assertion": "Produce two milestone assessments and a merged report with citations, confidence, decisions, and known limitations; no tracker use, ticket-existence claims, or implementation tasks."
+        }
+      ]
+    },
+    {
+      "id": "synthetic-selected",
+      "inputs": [
+        "fixtures/harbor-sow.md"
+      ],
+      "prompt": "Use requirements-coverage-audit on harbor-sow.md for only the Opening day delivery window. Write reports to the supplied output directory.",
+      "expectations": [
+        {
+          "id": "selection",
+          "assertion": "Produce only Opening day's milestone assessment plus a merged selected-scope report, using the complete document as context."
+        },
+        {
+          "id": "local-findings",
+          "assertion": "Identify S1 and S5 as explicit and S3 Email change as implicit under Member profile maintenance, with citations."
+        },
+        {
+          "id": "limits",
+          "assertion": "Explicitly state Whole-SoW completeness was not assessed and global sweep/historical reconciliation was not performed; do not present a claimed-items sweep as global completeness."
+        },
+        {
+          "id": "boundaries",
+          "assertion": "Keep S2 Loan history outside Opening day's ownership using the window boundary evidence; do not claim to have exhaustively audited Lending desk. If S4 is mentioned, cite its exclusion rather than report a gap."
+        }
+      ]
+    },
+    {
+      "id": "private-full",
+      "private_case": "drafts/evals/requirements-coverage-audit-private-case.json",
+      "note": "Real-document regression case. Its prompt, private inputs and expectations stay in the private file outside git. A missing file means the case is skipped, not passed."
+    },
+    {
+      "id": "jira-three-way",
+      "inputs": [
+        "fixtures/harbor-sow.md",
+        "fixtures/jira/scope.md",
+        "fixtures/jira/snapshot.md",
+        "fixtures/jira/page-1.json",
+        "fixtures/jira/page-2.json",
+        "fixtures/jira/details-8.json"
+      ],
+      "prompt": "Use requirements-coverage-audit to compare all authoritative promises in harbor-sow.md and scope.md against both the document delivery windows and the Jira release-version milestones in the supplied JSON pages. Follow snapshot.md provenance. Use exports only, not live Jira. Write to the supplied output directory.",
+      "expectations": [
+        {
+          "id": "full-inventory",
+          "assertion": "One ledger accounts for S1-S12 exactly once with separate document/Jira coverage and citations. S2 Loan history is absent in the document but ticketed by DEMO-9; Jira analysis must not be limited to document gaps."
+        },
+        {
+          "id": "partial",
+          "assertion": "S6 Overdue alerts is partial via DEMO-3: email covered, SMS excluded by the ticket but still authoritative scope. No other ticket covers SMS; do not let ticket exclusions remove requirements."
+        },
+        {
+          "id": "many-to-many",
+          "assertion": "S7 Equipment reservations is ticketed jointly by DEMO-4 and DEMO-11 across releases. Count once. Name a bundled-ticket finding for closed DEMO-5 covering S8 Loan CSV export and S9 Staff edit audit log. Do not claim implemented or unimplemented behavior."
+        },
+        {
+          "id": "exclusion",
+          "assertion": "S4 Deposit refund remains excluded with D1 citation; not a Jira gap."
+        },
+        {
+          "id": "negative-evidence",
+          "assertion": "S10 Screen reader navigation has no ticket: DEMO-6 title is a false match, complete body covers weather styling. S11 Late fee calculation has no covering ticket and is deferred by DEMO-7 without a destination. Cite full-content search evidence, scope and snapshot; both are named gaps."
+        },
+        {
+          "id": "content-access",
+          "assertion": "Read companion details-8.json before calling S12 Hold notification ticketed. Search's omitted description is not empty content or evidence of absence. All pages and descriptions are available in this case."
+        },
+        {
+          "id": "boundary",
+          "assertion": "Release versions define milestones, not DEMO-100 epic. S1,S3,S5 have Jira content coverage. S2 is in Lending desk. Unsupported weather scope is surfaced without inflated inventory counts."
+        }
+      ]
+    },
+    {
+      "id": "jira-selected",
+      "inputs": [
+        "fixtures/harbor-sow.md",
+        "fixtures/jira/scope.md",
+        "fixtures/jira/snapshot.md",
+        "fixtures/jira/page-1.json",
+        "fixtures/jira/page-2.json",
+        "fixtures/jira/details-8.json"
+      ],
+      "prompt": "Use requirements-coverage-audit to audit only Jira's Opening day release against all authoritative promises in harbor-sow.md and scope.md. Use supplied pages and snapshot.md, not live Jira. The document is requirements/context, not a second plan to audit. Write to the supplied output directory.",
+      "expectations": [
+        {
+          "id": "selection",
+          "assertion": "Only Opening day milestone report and selected merged report. Explicit whole-requirements/SoW completeness disclaimer; no global sweep or complete whole-project coverage claim."
+        },
+        {
+          "id": "elsewhere",
+          "assertion": "S7 submission is covered in selection by DEMO-4; cancellation is evidenced elsewhere by DEMO-11. Do not claim full S7 coverage within Opening day or global absence. S2 DEMO-9 remains evidenced in Lending desk, not globally missing."
+        },
+        {
+          "id": "local",
+          "assertion": "S1,S3,S5 cite DEMO-1,10,2 respectively. Version-based selection does not include every child of DEMO-100."
+        }
+      ]
+    },
+    {
+      "id": "jira-incomplete",
+      "inputs": [
+        "fixtures/harbor-sow.md",
+        "fixtures/jira/scope.md",
+        "fixtures/jira/incomplete-snapshot.md",
+        "fixtures/jira/page-1.json"
+      ],
+      "prompt": "Use requirements-coverage-audit to compare all requirements in harbor-sow.md and scope.md against the Jira release-version plan in supplied page-1.json. Read incomplete-snapshot.md for provenance. No live retrieval is authorized. Write reports to the supplied output directory.",
+      "expectations": [
+        {
+          "id": "missing-page",
+          "assertion": "Identify missing page 2, isLast=false/nextPageToken and only 8 retrieved issues against 12 expected. Do not claim a complete searchable Jira snapshot."
+        },
+        {
+          "id": "unknown-not-absent",
+          "assertion": "S2 and S3 coverage are unknown/unassessed, not no ticket. S7 is evidenced for submission, with cancellation unknown, not a confirmed missing cancellation. Do not cite or invent withheld DEMO-9/10/11."
+        },
+        {
+          "id": "preserve-positive",
+          "assertion": "Retain S1/S5 positive coverage, S4 cited exclusion and S8/S9 bundled-ticket evidence. S12 remains unassessed due to inaccessible description."
+        },
+        {
+          "id": "accounting",
+          "assertion": "Inventory accounting may list S1-S12 once including unknowns, but never calls that complete coverage. Distinguish incomplete evidence from exact-once row accounting; disclaim missing shared milestone context and unknown deferral destinations."
+        }
+      ]
+    }
+  ]
+}

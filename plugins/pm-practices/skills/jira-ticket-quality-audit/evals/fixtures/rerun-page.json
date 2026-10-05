@@ -1,0 +1,190 @@
+{
+  "issues": [
+    {
+      "key": "DEMO-1",
+      "fields": {
+        "issuetype": {
+          "name": "Story"
+        },
+        "status": {
+          "name": "QA"
+        },
+        "summary": "Archive reservation chat",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Why: Members need to retain reservation history."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "What: On cancellation, archive chat read-only for its original members and display status Reserved before cancellation. Source: rules.md Cancellation. Outsiders retain no access."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "AC: Cancellation preserves chat history for original members, disables posting, and denies outsider access."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-3",
+      "fields": {
+        "issuetype": {
+          "name": "Bug"
+        },
+        "status": {
+          "name": "Done"
+        },
+        "summary": "Reservation page does not work properly",
+        "description": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-4",
+      "fields": {
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "QA"
+        },
+        "summary": "Set reservation dialog field gap to 12px",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Change the vertical gap between the two fields in the reservation dialog from 8px to 12px at all viewport widths. No other changes."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": {
+          "key": "DEMO-9"
+        },
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    },
+    {
+      "key": "DEMO-7",
+      "fields": {
+        "summary": "Remove unused helper argument and add return annotation",
+        "issuetype": {
+          "name": "Task"
+        },
+        "status": {
+          "name": "On Hold"
+        }
+      }
+    },
+    {
+      "key": "DEMO-13",
+      "fields": {
+        "issuetype": {
+          "name": "Bug"
+        },
+        "status": {
+          "name": "To Do"
+        },
+        "summary": "Blank search renders raw JSON",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Steps: On test build 3, staff opens /reservations and submits a blank search."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Expected: An empty-state message, per rules.md Search UI. Actual: Literal [] text."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "AC: Empty response renders No reservations. Nonempty response still renders reservation rows."
+                }
+              ]
+            }
+          ]
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "parent": null,
+        "issuelinks": [],
+        "comment": {
+          "comments": [],
+          "total": 0
+        },
+        "attachment": []
+      }
+    }
+  ],
+  "isLast": false,
+  "nextPageToken": "synthetic-next"
+}

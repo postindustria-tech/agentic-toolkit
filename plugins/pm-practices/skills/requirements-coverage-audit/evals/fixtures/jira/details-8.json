@@ -1,0 +1,14 @@
+{
+  "id": "90008",
+  "key": "DEMO-8",
+  "fields": {
+    "summary": "Hold notification",
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Members receive an email when their hold becomes available. Acceptance: an available hold sends the member a notification."}]}]
+    },
+    "status": {"name": "To Do"},
+    "fixVersions": [{"id": "902", "name": "Lending desk"}]
+  }
+}
