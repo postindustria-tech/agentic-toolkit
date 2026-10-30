@@ -137,8 +137,9 @@ type, state the shape in one line and continue to the draft.
 
 Use the refinement template and point scale from
 `${CLAUDE_PLUGIN_ROOT}/skills/jira-ticket-refinement/references/drafting.md`:
-Summary, Context, Current State, Acceptance Criteria, Dev Tasks, with optional
-sections genuinely optional and 1, 2, 3, 5 or 8 points.
+Why, Current State, What, Acceptance Criteria, then Open decisions and
+Dependencies when needed, with optional sections genuinely optional and 1, 2,
+3, 5 or 8 points.
 
 In a breakdown the parent carries the outcome, the outcome-level acceptance
 criteria and the list of children. Each child carries its own acceptance

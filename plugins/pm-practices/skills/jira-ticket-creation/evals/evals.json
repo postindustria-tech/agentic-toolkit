@@ -23,7 +23,8 @@
         "Separates independently acceptable outcomes (schedule management, scheduled rendering and delivery with retry, cascade on report deletion with notice) from pieces that are only subtasks of one outcome, with a stated reason.",
         "Puts points on children only; parents with pointed children stay unpointed with the double-counting reason stated.",
         "Every child has its own acceptance criteria with observable outcomes, including negative paths (external recipient rejected, failed run shows error, retry once after 15 minutes); the parent carries outcome-level criteria without repeating child prose.",
-        "Includes a self-check table with the rubric dimensions per ticket and resolves or lists every weak or missing cell; does not invent file paths or code claims without a repository."
+        "Includes a self-check table with the rubric dimensions per ticket and resolves or lists every weak or missing cell; does not invent file paths or code claims without a repository.",
+        "Each child's What items are instructions to the developer: a verb that names the change, the place and the behavior to deliver; implementation details, including route paths and table or field names, appear only where a source requires them, and no item is a label-colon fragment or a bare ticket-key reference."
       ]
     },
     {
