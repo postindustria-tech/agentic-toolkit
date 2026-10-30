@@ -1,6 +1,6 @@
 # PM Practices Plugin
 
-**Version**: 0.1.0
+**Version**: 0.2.0
 
 **Status**: Skills are tested with fixture-based evals and ready to use.
 

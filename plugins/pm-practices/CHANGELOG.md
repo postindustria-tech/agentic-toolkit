@@ -2,7 +2,7 @@
 
 All notable changes to the pm-practices plugin are documented here.
 
-## Unreleased
+## 0.2.0
 
 ### Changed
 
