@@ -103,7 +103,7 @@ Development toolkit for the [neograph](https://neograph.pro) declarative LLM gra
 
 ---
 
-### PM Practices (`pm-practices`) - v0.1.0
+### PM Practices (`pm-practices`) - v0.2.0
 
 Project-management skills for requirements coverage, Jira ticket quality, refinement and creation. Project agnostic: site, project and field ids come from your private config. See [plugins/pm-practices/README.md](plugins/pm-practices/README.md) for setup.
 
