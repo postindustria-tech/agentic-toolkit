@@ -2,6 +2,12 @@
 
 All notable changes to the pm-practices plugin are documented here.
 
+## Unreleased
+
+### Changed
+
+- `jira-ticket-refinement` drafting reference, also used by `jira-ticket-creation`: the template sections are now Why, Current State (optional), What, Acceptance Criteria, then Open decisions and Dependencies (optional), the names the ticket-quality rubric uses; What comes before the acceptance criteria. Each item under What is one instruction to the developer, with a verb that names the change, the place and the behavior to deliver. Implementation details, including names such as route paths and methods, appear only when a source or bug evidence requires them. A before/after example shows the rewrite, and one eval expectation per skill checks the form.
+
 ## 0.1.0
 
 ### Added

@@ -10,7 +10,8 @@
         "Exposes the bundled invite capability and missing deferral destination instead of silently dropping or claiming it is tracked.",
         "Does not invent code paths or adopt the stale audit estimate as established evidence.",
         "Keeps DEMO-22 concise and preserves its explicit icon/layout exclusions and existing one-point estimate.",
-        "Distinguishes candidate/draft approval from write approval and recognizes the unsupported ACLI custom-field path without pretending edits occurred."
+        "Distinguishes candidate/draft approval from write approval and recognizes the unsupported ACLI custom-field path without pretending edits occurred.",
+        "Writes each item under What as an instruction to the developer: it starts with a verb that names the change, names where the change happens and describes the behavior to deliver rather than an implementation; no label-colon fragments, no bare ticket-key references and no invented route paths, table or field names."
       ]
     },
     {
